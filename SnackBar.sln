@@ -5,6 +5,10 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnackBarModel", "SnackBarModel\SnackBarModel.csproj", "{28FF25B2-96C9-4EEC-B1D7-FA93CE20BC6B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnackBarService", "SnackBarService\SnackBarService.csproj", "{147539BB-18F9-4D14-A8A0-8F9E6E41B6DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnackBarView", "SnackBarView\SnackBarView.csproj", "{AB4FD6EF-AFB9-40A9-B747-EFCE82D1E460}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{28FF25B2-96C9-4EEC-B1D7-FA93CE20BC6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28FF25B2-96C9-4EEC-B1D7-FA93CE20BC6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28FF25B2-96C9-4EEC-B1D7-FA93CE20BC6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{147539BB-18F9-4D14-A8A0-8F9E6E41B6DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{147539BB-18F9-4D14-A8A0-8F9E6E41B6DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{147539BB-18F9-4D14-A8A0-8F9E6E41B6DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{147539BB-18F9-4D14-A8A0-8F9E6E41B6DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB4FD6EF-AFB9-40A9-B747-EFCE82D1E460}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB4FD6EF-AFB9-40A9-B747-EFCE82D1E460}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB4FD6EF-AFB9-40A9-B747-EFCE82D1E460}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB4FD6EF-AFB9-40A9-B747-EFCE82D1E460}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

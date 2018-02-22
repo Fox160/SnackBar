@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{28FF25B2-96C9-4EEC-B1D7-FA93CE20BC6B}</ProjectGuid>
+    <ProjectGuid>{147539BB-18F9-4D14-A8A0-8F9E6E41B6DA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SnackBarModel</RootNamespace>
-    <AssemblyName>SnackBarModel</AssemblyName>
+    <RootNamespace>SnackBarService</RootNamespace>
+    <AssemblyName>SnackBarService</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -40,17 +40,44 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Customer.cs" />
-    <Compile Include="Element.cs" />
-    <Compile Include="Executor.cs" />
-    <Compile Include="Order.cs" />
-    <Compile Include="StatusOfOrder.cs" />
-    <Compile Include="Product.cs" />
-    <Compile Include="ProductElement.cs" />
+    <Compile Include="DataFromUser\BoundClientModel.cs" />
+    <Compile Include="DataFromUser\BoundComponentModel.cs" />
+    <Compile Include="DataFromUser\BoundExecutorModel.cs" />
+    <Compile Include="DataFromUser\BoundOrderModel.cs" />
+    <Compile Include="DataFromUser\BoundProductModel.cs" />
+    <Compile Include="DataFromUser\BoundProdComponentModel.cs" />
+    <Compile Include="DataFromUser\BoundReserveModel.cs" />
+    <Compile Include="DataFromUser\BoundResComponentModel.cs" />
+    <Compile Include="DataListSingleton.cs" />
+    <Compile Include="ImplementatoinsList\ClientServiceList.cs" />
+    <Compile Include="ImplementatoinsList\ComponentServiceList.cs" />
+    <Compile Include="ImplementatoinsList\EexecutorServiceList.cs" />
+    <Compile Include="ImplementatoinsList\MainServiceList.cs" />
+    <Compile Include="ImplementatoinsList\ProductServiceList.cs" />
+    <Compile Include="ImplementatoinsList\ReserveServiceList.cs" />
+    <Compile Include="Interfaces\InterfaceClientService.cs" />
+    <Compile Include="Interfaces\InterfaceComponentService.cs" />
+    <Compile Include="Interfaces\InterfaceExecutorService.cs" />
+    <Compile Include="Interfaces\InterfaceMainService.cs" />
+    <Compile Include="Interfaces\InterfaceProductService.cs" />
+    <Compile Include="Interfaces\InterfaceReserveService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reserve.cs" />
-    <Compile Include="ReserveElement.cs" />
+    <Compile Include="ViewModel\ModelClientView.cs" />
+    <Compile Include="ViewModel\ModelComponentView.cs" />
+    <Compile Include="ViewModel\ModelExecutorView.cs" />
+    <Compile Include="ViewModel\ModelOrderView.cs" />
+    <Compile Include="ViewModel\ModelProdComponentView.cs" />
+    <Compile Include="ViewModel\ModelProductView.cs" />
+    <Compile Include="ViewModel\ModelReserveComponentView.cs" />
+    <Compile Include="ViewModel\ModelReserveView.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SnackBarModel\SnackBarModel.csproj">
+      <Project>{28ff25b2-96c9-4eec-b1d7-fa93ce20bc6b}</Project>
+      <Name>SnackBarModel</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
