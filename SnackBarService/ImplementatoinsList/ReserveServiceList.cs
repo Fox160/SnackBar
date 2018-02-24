@@ -21,7 +21,7 @@ namespace SnackBarService.ImplementationsList
             List<ModelReserveView> result = new List<ModelReserveView>();
             for (int i = 0; i < source.Reserves.Count; ++i)
             {
-                List<ModelReserveComponentView> StockComponents = new List<ModelReserveComponentView>();
+                List<ModelReserveElementView> StockComponents = new List<ModelReserveElementView>();
                 for (int j = 0; j < source.ReserveElements.Count; ++j)
                 {
                     if (source.ReserveElements[j].ReserveID == source.Reserves[i].ID)
@@ -35,7 +35,7 @@ namespace SnackBarService.ImplementationsList
                                 break;
                             }
                         }
-                        StockComponents.Add(new ModelReserveComponentView
+                        StockComponents.Add(new ModelReserveElementView
                         {
                             ID = source.ReserveElements[j].ID,
                             ReserveID = source.ReserveElements[j].ReserveID,
@@ -59,7 +59,7 @@ namespace SnackBarService.ImplementationsList
         {
             for (int i = 0; i < source.Reserves.Count; ++i)
             {
-                List<ModelReserveComponentView> StockComponents = new List<ModelReserveComponentView>();
+                List<ModelReserveElementView> StockComponents = new List<ModelReserveElementView>();
                 for (int j = 0; j < source.ReserveElements.Count; ++j)
                 {
                     if (source.ReserveElements[j].ReserveID == source.Reserves[i].ID)
@@ -73,7 +73,7 @@ namespace SnackBarService.ImplementationsList
                                 break;
                             }
                         }
-                        StockComponents.Add(new ModelReserveComponentView
+                        StockComponents.Add(new ModelReserveElementView
                         {
                             ID = source.ReserveElements[j].ID,
                             ReserveID = source.ReserveElements[j].ReserveID,

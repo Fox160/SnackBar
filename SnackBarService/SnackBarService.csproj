@@ -40,35 +40,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataFromUser\BoundClientModel.cs" />
-    <Compile Include="DataFromUser\BoundComponentModel.cs" />
+    <Compile Include="DataFromUser\BoundCustomerModel.cs" />
+    <Compile Include="DataFromUser\BoundElementModel.cs" />
     <Compile Include="DataFromUser\BoundExecutorModel.cs" />
-    <Compile Include="DataFromUser\BoundOrderModel.cs" />
-    <Compile Include="DataFromUser\BoundProductModel.cs" />
-    <Compile Include="DataFromUser\BoundProdComponentModel.cs" />
+    <Compile Include="DataFromUser\BoundBookingModel.cs" />
+    <Compile Include="DataFromUser\BoundOutputModel.cs" />
+    <Compile Include="DataFromUser\BoundProdElementModel.cs" />
     <Compile Include="DataFromUser\BoundReserveModel.cs" />
-    <Compile Include="DataFromUser\BoundResComponentModel.cs" />
+    <Compile Include="DataFromUser\BoundResElementModel.cs" />
     <Compile Include="DataListSingleton.cs" />
-    <Compile Include="ImplementatoinsList\ClientServiceList.cs" />
+    <Compile Include="ImplementatoinsList\CustomerServiceList.cs" />
     <Compile Include="ImplementatoinsList\ComponentServiceList.cs" />
     <Compile Include="ImplementatoinsList\EexecutorServiceList.cs" />
     <Compile Include="ImplementatoinsList\MainServiceList.cs" />
-    <Compile Include="ImplementatoinsList\ProductServiceList.cs" />
+    <Compile Include="ImplementatoinsList\OutputServiceList.cs" />
     <Compile Include="ImplementatoinsList\ReserveServiceList.cs" />
-    <Compile Include="Interfaces\InterfaceClientService.cs" />
+    <Compile Include="Interfaces\InterfaceCustomerService.cs" />
     <Compile Include="Interfaces\InterfaceComponentService.cs" />
     <Compile Include="Interfaces\InterfaceExecutorService.cs" />
     <Compile Include="Interfaces\InterfaceMainService.cs" />
-    <Compile Include="Interfaces\InterfaceProductService.cs" />
+    <Compile Include="Interfaces\InterfaceOutputService.cs" />
     <Compile Include="Interfaces\InterfaceReserveService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModel\ModelClientView.cs" />
-    <Compile Include="ViewModel\ModelComponentView.cs" />
+    <Compile Include="ViewModel\ModelCustomerView.cs" />
+    <Compile Include="ViewModel\ModelElementView.cs" />
     <Compile Include="ViewModel\ModelExecutorView.cs" />
-    <Compile Include="ViewModel\ModelOrderView.cs" />
-    <Compile Include="ViewModel\ModelProdComponentView.cs" />
+    <Compile Include="ViewModel\ModelBookingView.cs" />
+    <Compile Include="ViewModel\ModelProdElementView.cs" />
     <Compile Include="ViewModel\ModelProductView.cs" />
-    <Compile Include="ViewModel\ModelReserveComponentView.cs" />
+    <Compile Include="ViewModel\ModelReserveElementView.cs" />
     <Compile Include="ViewModel\ModelReserveView.cs" />
   </ItemGroup>
   <ItemGroup>

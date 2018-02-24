@@ -44,7 +44,7 @@ namespace SnackBarView
 
         private void клиентыToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormClients>();
+            var form = Container.Resolve<FormCustomers>();
             form.ShowDialog();
         }
 
@@ -56,7 +56,7 @@ namespace SnackBarView
 
         private void изделияToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormProducts>();
+            var form = Container.Resolve<FormOutputs>();
             form.ShowDialog();
         }
 
@@ -80,7 +80,7 @@ namespace SnackBarView
 
         private void buttonCreateOrder_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormCreateOrder>();
+            var form = Container.Resolve<FormCreateBooking>();
             form.ShowDialog();
             LoadData();
         }
@@ -89,7 +89,7 @@ namespace SnackBarView
         {
             if (dataGridViewMain.SelectedRows.Count == 1)
             {
-                var form = Container.Resolve<FormTakeOrderInWork>();
+                var form = Container.Resolve<FormTakeBookingInWork>();
                 form.ID = Convert.ToInt32(dataGridViewMain.SelectedRows[0].Cells[0].Value);
                 form.ShowDialog();
                 LoadData();

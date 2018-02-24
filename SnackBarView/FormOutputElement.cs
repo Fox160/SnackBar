@@ -1,5 +1,4 @@
-﻿using SnackBarService.DataFromUser;
-using SnackBarService.Interfaces;
+﻿using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -9,49 +8,45 @@ using Unity.Attributes;
 
 namespace SnackBarView
 {
-    public partial class FormPutOnReserve : Form
+    public partial class FormOutputElement : Form
     {
         [Dependency]
         public new IUnityContainer Container { get; set; }
 
-        private readonly InterfaceReserveService serviceReserve;
+        public ModelProdElementView Model { set { model = value; } get { return model; } }
 
-        private readonly InterfaceComponentService serviceComponent;
+        private readonly InterfaceComponentService service;
 
-        private readonly InterfaceMainService serviceMain;
+        private ModelProdElementView model;
 
-        public FormPutOnReserve(InterfaceReserveService serviceS, InterfaceComponentService serviceC, InterfaceMainService serviceM)
+        public FormOutputElement(InterfaceComponentService service)
         {
             InitializeComponent();
-            this.serviceReserve = serviceS;
-            this.serviceComponent = serviceC;
-            this.serviceMain = serviceM;
+            this.service = service;
         }
 
-        private void FormPutOnStock_Load(object sender, EventArgs e)
+        private void FormProductComponent_Load(object sender, EventArgs e)
         {
             try
             {
-                List<ModelElementView> listElement = serviceComponent.getList();
-                if (listElement != null)
+                List<ModelElementView> list = service.getList();
+                if (list != null)
                 {
                     comboBoxComponent.DisplayMember = "ElementName";
                     comboBoxComponent.ValueMember = "Id";
-                    comboBoxComponent.DataSource = listElement;
+                    comboBoxComponent.DataSource = list;
                     comboBoxComponent.SelectedItem = null;
-                }
-                List<ModelReserveView> listReserve = serviceReserve.getList();
-                if (listReserve != null)
-                {
-                    comboBoxStock.DisplayMember = "ReserveName";
-                    comboBoxStock.ValueMember = "Id";
-                    comboBoxStock.DataSource = listReserve;
-                    comboBoxStock.SelectedItem = null;
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            if (model != null)
+            {
+                comboBoxComponent.Enabled = false;
+                comboBoxComponent.SelectedValue = model.ElementID;
+                textBoxCount.Text = model.Count.ToString();
             }
         }
 
@@ -67,19 +62,21 @@ namespace SnackBarView
                 MessageBox.Show("Выберите компонент", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            if (comboBoxStock.SelectedValue == null)
-            {
-                MessageBox.Show("Выберите склад", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
             try
             {
-                serviceMain.putComponentOnReserve(new BoundResElementModel
+                if (model == null)
                 {
-                    ElementID = Convert.ToInt32(comboBoxComponent.SelectedValue),
-                    ReserveID = Convert.ToInt32(comboBoxStock.SelectedValue),
-                    Count = Convert.ToInt32(textBoxCount.Text)
-                });
+                    model = new ModelProdElementView
+                    {
+                        ElementID = Convert.ToInt32(comboBoxComponent.SelectedValue),
+                        ElementName = comboBoxComponent.Text,
+                        Count = Convert.ToInt32(textBoxCount.Text)
+                    };
+                }
+                else
+                {
+                    model.Count = Convert.ToInt32(textBoxCount.Text);
+                }
                 MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DialogResult = DialogResult.OK;
                 Close();

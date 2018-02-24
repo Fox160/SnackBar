@@ -8,34 +8,32 @@ using Unity.Attributes;
 
 namespace SnackBarView
 {
-    public partial class FormElement : Form
+    public partial class FormCustomer : Form
     {
         [Dependency]
         public new IUnityContainer Container { get; set; }
 
         public int ID { set { id = value; } }
 
-        private readonly InterfaceComponentService service;
+        private readonly InterfaceCustomerService service;
 
         private int? id;
 
-        public FormElement(InterfaceComponentService service)
+        public FormCustomer(InterfaceCustomerService service)
         {
             InitializeComponent();
             this.service = service;
         }
 
-        private void FormComponent_Load(object sender, EventArgs e)
+        private void FormClient_Load(object sender, EventArgs e)
         {
             if (id.HasValue)
             {
                 try
                 {
-                    ModelElementView view = service.getElement(id.Value);
+                    ModelCustomerView view = service.getElement(id.Value);
                     if (view != null)
-                    {
-                        textBoxName.Text = view.ElementName;
-                    }
+                        textBoxFullName.Text = view.ClientFullName;
                 }
                 catch (Exception ex)
                 {
@@ -46,26 +44,26 @@ namespace SnackBarView
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(textBoxName.Text))
+            if (string.IsNullOrEmpty(textBoxFullName.Text))
             {
-                MessageBox.Show("Заполните название", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Заполните ФИО", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             try
             {
                 if (id.HasValue)
                 {
-                    service.updateElement(new BoundElementModel
+                    service.updateElement(new BoundCustomerModel
                     {
                         ID = id.Value,
-                        ElementName = textBoxName.Text
+                        ClientFullName = textBoxFullName.Text
                     });
                 }
                 else
                 {
-                    service.addElement(new BoundElementModel
+                    service.addElement(new BoundCustomerModel
                     {
-                        ElementName = textBoxName.Text
+                        ClientFullName = textBoxFullName.Text
                     });
                 }
                 MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);

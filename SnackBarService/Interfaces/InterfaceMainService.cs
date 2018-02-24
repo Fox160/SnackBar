@@ -8,14 +8,14 @@ namespace SnackBarService.Interfaces
     {
         List<OrderViewModel> getList();
 
-        void createOrder(BoundOrderModel model);
+        void createOrder(BoundBookingModel model);
 
-        void takeOrderInWork(BoundOrderModel model);
+        void takeOrderInWork(BoundBookingModel model);
 
         void finishOrder(int id);
 
         void payOrder(int id);
 
-        void putComponentOnReserve(BoundResComponentModel model);
+        void putComponentOnReserve(BoundResElementModel model);
     }
 }

@@ -16,12 +16,12 @@ namespace SnackBarService.ImplementationsList
             source = DataListSingleton.GetInstance();
         }
 
-        public List<ModelComponentView> getList()
+        public List<ModelElementView> getList()
         {
-            List<ModelComponentView> result = new List<ModelComponentView>();
+            List<ModelElementView> result = new List<ModelElementView>();
             for (int i = 0; i < source.Elements.Count; ++i)
             {
-                result.Add(new ModelComponentView
+                result.Add(new ModelElementView
                 {
                     ID = source.Elements[i].ID,
                     ElementName = source.Elements[i].ElementName
@@ -30,13 +30,13 @@ namespace SnackBarService.ImplementationsList
             return result;
         }
 
-        public ModelComponentView getElement(int id)
+        public ModelElementView getElement(int id)
         {
             for (int i = 0; i < source.Elements.Count; ++i)
             {
                 if (source.Elements[i].ID == id)
                 {
-                    return new ModelComponentView
+                    return new ModelElementView
                     {
                         ID = source.Elements[i].ID,
                         ElementName = source.Elements[i].ElementName
@@ -46,7 +46,7 @@ namespace SnackBarService.ImplementationsList
             throw new Exception("Элемент не найден");
         }
 
-        public void addElement(BoundComponentModel model)
+        public void addElement(BoundElementModel model)
         {
             int maxID = 0;
             for (int i = 0; i < source.Elements.Count; ++i)
@@ -63,7 +63,7 @@ namespace SnackBarService.ImplementationsList
             });
         }
 
-        public void updateElement(BoundComponentModel model)
+        public void updateElement(BoundElementModel model)
         {
             int index = -1;
             for (int i = 0; i < source.Elements.Count; ++i)

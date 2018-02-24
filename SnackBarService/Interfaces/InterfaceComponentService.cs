@@ -6,13 +6,13 @@ namespace SnackBarService.Interfaces
 {
     public interface InterfaceComponentService
     {
-        List<ModelComponentView> getList();
+        List<ModelElementView> getList();
 
-        ModelComponentView getElement(int id);
+        ModelElementView getElement(int id);
 
-        void addElement(BoundComponentModel model);
+        void addElement(BoundElementModel model);
 
-        void updateElement(BoundComponentModel model);
+        void updateElement(BoundElementModel model);
 
         void deleteElement(int id);
     }

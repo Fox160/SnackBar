@@ -78,17 +78,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormClient.cs">
+    <Compile Include="FormCustomer.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormClient.designer.cs">
-      <DependentUpon>FormClient.cs</DependentUpon>
+    <Compile Include="FormCustomer.designer.cs">
+      <DependentUpon>FormCustomer.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormClients.cs">
+    <Compile Include="FormCustomers.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormClients.designer.cs">
-      <DependentUpon>FormClients.cs</DependentUpon>
+    <Compile Include="FormCustomers.designer.cs">
+      <DependentUpon>FormCustomers.cs</DependentUpon>
     </Compile>
     <Compile Include="FormElement.cs">
       <SubType>Form</SubType>
@@ -102,11 +102,11 @@
     <Compile Include="FormElements.designer.cs">
       <DependentUpon>FormElements.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormCreateOrder.cs">
+    <Compile Include="FormCreateBooking.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormCreateOrder.designer.cs">
-      <DependentUpon>FormCreateOrder.cs</DependentUpon>
+    <Compile Include="FormCreateBooking.designer.cs">
+      <DependentUpon>FormCreateBooking.cs</DependentUpon>
     </Compile>
     <Compile Include="FormExecutor.cs">
       <SubType>Form</SubType>
@@ -126,23 +126,23 @@
     <Compile Include="FormMain.designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormProduct.cs">
+    <Compile Include="FormOutput.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormProduct.designer.cs">
-      <DependentUpon>FormProduct.cs</DependentUpon>
+    <Compile Include="FormOutput.designer.cs">
+      <DependentUpon>FormOutput.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormProductElement.cs">
+    <Compile Include="FormOutputElement.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormProductElement.designer.cs">
-      <DependentUpon>FormProductElement.cs</DependentUpon>
+    <Compile Include="FormOutputElement.designer.cs">
+      <DependentUpon>FormOutputElement.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormProducts.cs">
+    <Compile Include="FormOutputs.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormProducts.designer.cs">
-      <DependentUpon>FormProducts.cs</DependentUpon>
+    <Compile Include="FormOutputs.designer.cs">
+      <DependentUpon>FormOutputs.cs</DependentUpon>
     </Compile>
     <Compile Include="FormPutOnReserve.cs">
       <SubType>Form</SubType>
@@ -162,19 +162,19 @@
     <Compile Include="FormReserves.designer.cs">
       <DependentUpon>FormReserves.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormTakeOrderInWork.cs">
+    <Compile Include="FormTakeBookingInWork.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormTakeOrderInWork.designer.cs">
-      <DependentUpon>FormTakeOrderInWork.cs</DependentUpon>
+    <Compile Include="FormTakeBookingInWork.designer.cs">
+      <DependentUpon>FormTakeBookingInWork.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FormClient.resx">
-      <DependentUpon>FormClient.cs</DependentUpon>
+    <EmbeddedResource Include="FormCustomer.resx">
+      <DependentUpon>FormCustomer.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormClients.resx">
-      <DependentUpon>FormClients.cs</DependentUpon>
+    <EmbeddedResource Include="FormCustomers.resx">
+      <DependentUpon>FormCustomers.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormElement.resx">
       <DependentUpon>FormElement.cs</DependentUpon>
@@ -182,8 +182,8 @@
     <EmbeddedResource Include="FormElements.resx">
       <DependentUpon>FormElements.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormCreateOrder.resx">
-      <DependentUpon>FormCreateOrder.cs</DependentUpon>
+    <EmbeddedResource Include="FormCreateBooking.resx">
+      <DependentUpon>FormCreateBooking.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormExecutor.resx">
       <DependentUpon>FormExecutor.cs</DependentUpon>
@@ -194,14 +194,14 @@
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormProduct.resx">
-      <DependentUpon>FormProduct.cs</DependentUpon>
+    <EmbeddedResource Include="FormOutput.resx">
+      <DependentUpon>FormOutput.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormProductElement.resx">
-      <DependentUpon>FormProductElement.cs</DependentUpon>
+    <EmbeddedResource Include="FormOutputElement.resx">
+      <DependentUpon>FormOutputElement.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormProducts.resx">
-      <DependentUpon>FormProducts.cs</DependentUpon>
+    <EmbeddedResource Include="FormOutputs.resx">
+      <DependentUpon>FormOutputs.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormPutOnReserve.resx">
       <DependentUpon>FormPutOnReserve.cs</DependentUpon>
@@ -212,8 +212,8 @@
     <EmbeddedResource Include="FormReserves.resx">
       <DependentUpon>FormReserves.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormTakeOrderInWork.resx">
-      <DependentUpon>FormTakeOrderInWork.cs</DependentUpon>
+    <EmbeddedResource Include="FormTakeBookingInWork.resx">
+      <DependentUpon>FormTakeBookingInWork.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

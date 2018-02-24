@@ -10,6 +10,6 @@ namespace SnackBarService.ViewModel
 
         public decimal Price { get; set; }
 
-        public List<ModelProdComponentView> ProductElements { get; set; }
+        public List<ModelProdElementView> ProductElements { get; set; }
     }
 }

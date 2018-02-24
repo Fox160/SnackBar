@@ -8,6 +8,6 @@ namespace SnackBarService.ViewModel
 
         public string ReserveName { get; set; }
 
-        public List<ModelReserveComponentView> ReserveElements { get; set; }
+        public List<ModelReserveElementView> ReserveElements { get; set; }
     }
 }

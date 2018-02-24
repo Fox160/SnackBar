@@ -70,7 +70,7 @@ namespace SnackBarService.ImplementationsList
             return result;
         }
 
-        public void createOrder(BoundOrderModel model)
+        public void createOrder(BoundBookingModel model)
         {
             int maxID = 0;
             for (int i = 0; i < source.Orders.Count; ++i)
@@ -78,7 +78,7 @@ namespace SnackBarService.ImplementationsList
                 if (source.Orders[i].ID > maxID)
                     maxID = source.Clients[i].ID;
             }
-            source.Orders.Add(new Order
+            source.Orders.Add(new Booking
             {
                 ID = maxID + 1,
                 ClientID = model.ClientID,
@@ -86,11 +86,11 @@ namespace SnackBarService.ImplementationsList
                 DateOfCreate = DateTime.Now,
                 Count = model.Count,
                 Summa = model.Summa,
-                Status = StatusOfOrder.Принятый
+                Status = StatusOfBooking.Принятый
             });
         }
 
-        public void takeOrderInWork(BoundOrderModel model)
+        public void takeOrderInWork(BoundBookingModel model)
         {
             int index = -1;
             for (int i = 0; i < source.Orders.Count; ++i)
@@ -149,7 +149,7 @@ namespace SnackBarService.ImplementationsList
             }
             source.Orders[index].ExecutorID = model.ExecutorID;
             source.Orders[index].DateOfImplement = DateTime.Now;
-            source.Orders[index].Status = StatusOfOrder.Выполняемый;
+            source.Orders[index].Status = StatusOfBooking.Выполняемый;
         }
 
         public void finishOrder(int id)
@@ -165,7 +165,7 @@ namespace SnackBarService.ImplementationsList
             }
             if (index == -1)
                 throw new Exception("Элемент не найден");
-            source.Orders[index].Status = StatusOfOrder.Готов;
+            source.Orders[index].Status = StatusOfBooking.Готов;
         }
 
         public void payOrder(int id)
@@ -181,10 +181,10 @@ namespace SnackBarService.ImplementationsList
             }
             if (index == -1)
                 throw new Exception("Элемент не найден");
-            source.Orders[index].Status = StatusOfOrder.Оплаченный;
+            source.Orders[index].Status = StatusOfBooking.Оплаченный;
         }
 
-        public void putComponentOnReserve(BoundResComponentModel model)
+        public void putComponentOnReserve(BoundResElementModel model)
         {
             int maxID = 0;
             for (int i = 0; i < source.ReserveElements.Count; ++i)

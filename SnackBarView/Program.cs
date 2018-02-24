@@ -28,10 +28,10 @@ namespace SnackBarView
         public static IUnityContainer BuildUnityContainer()
         {
             var currentContainer = new UnityContainer();
-            currentContainer.RegisterType<InterfaceClientService, ClientServiceList>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceCustomerService, ClientServiceList>(new HierarchicalLifetimeManager());
             currentContainer.RegisterType<InterfaceComponentService, ComponentServiceList>(new HierarchicalLifetimeManager());
             currentContainer.RegisterType<InterfaceExecutorService, ExecutorServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceProductService, ProductServiceList>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceOutputService, ProductServiceList>(new HierarchicalLifetimeManager());
             currentContainer.RegisterType<InterfaceReserveService, ReserveServiceList>(new HierarchicalLifetimeManager());
             currentContainer.RegisterType<InterfaceMainService, MainServiceList>(new HierarchicalLifetimeManager());
 
