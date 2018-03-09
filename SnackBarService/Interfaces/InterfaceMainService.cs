@@ -6,7 +6,7 @@ namespace SnackBarService.Interfaces
 {
     public interface InterfaceMainService
     {
-        List<OrderViewModel> getList();
+        List<ModelBookingView> getList();
 
         void createOrder(BoundBookingModel model);
 

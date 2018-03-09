@@ -10,9 +10,9 @@ namespace SnackBarModel
     {
         public int ID { get; set; }
 
-        public int ClientID { get; set; }
+        public int CustomerID { get; set; }
 
-        public int ProductID { get; set; }
+        public int OutputID { get; set; }
 
         public int? ExecutorID { get; set; }
 

@@ -25,7 +25,7 @@ namespace SnackBarView
         {
             try
             {
-                List<OrderViewModel> list = service.getList();
+                List<ModelBookingView> list = service.getList();
                 if (list != null)
                 {
                     dataGridViewMain.DataSource = list;

@@ -4,7 +4,7 @@
     {
         public int ID { get; set; }
 
-        public int ProductID { get; set; }
+        public int OutputID { get; set; }
 
         public int ElementID { get; set; }
 

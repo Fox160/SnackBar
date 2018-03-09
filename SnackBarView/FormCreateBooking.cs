@@ -35,15 +35,15 @@ namespace SnackBarView
                 List<ModelCustomerView> listClient = serviceClient.getList();
                 if (listClient != null)
                 {
-                    comboBoxClient.DisplayMember = "ClientFullName";
+                    comboBoxClient.DisplayMember = "CustomerFullName";
                     comboBoxClient.ValueMember = "Id";
                     comboBoxClient.DataSource = listClient;
                     comboBoxClient.SelectedItem = null;
                 }
-                List<ModelProductView> listProduct = serviceProduct.getList();
+                List<ModelOutputView> listProduct = serviceProduct.getList();
                 if (listProduct != null)
                 {
-                    comboBoxProduct.DisplayMember = "ProductName";
+                    comboBoxProduct.DisplayMember = "OutputName";
                     comboBoxProduct.ValueMember = "Id";
                     comboBoxProduct.DataSource = listProduct;
                     comboBoxProduct.SelectedItem = null;
@@ -62,7 +62,7 @@ namespace SnackBarView
                 try
                 {
                     int id = Convert.ToInt32(comboBoxProduct.SelectedValue);
-                    ModelProductView product = serviceProduct.getElement(id);
+                    ModelOutputView product = serviceProduct.getElement(id);
                     int count = Convert.ToInt32(textBoxCount.Text);
                     textBoxSum.Text = (count * product.Price).ToString();
                 }
@@ -104,8 +104,8 @@ namespace SnackBarView
             {
                 serviceMain.createOrder(new BoundBookingModel
                 {
-                    ClientID = Convert.ToInt32(comboBoxClient.SelectedValue),
-                    ProductID = Convert.ToInt32(comboBoxProduct.SelectedValue),
+                    CustomerID = Convert.ToInt32(comboBoxClient.SelectedValue),
+                    OutputID = Convert.ToInt32(comboBoxProduct.SelectedValue),
                     Count = Convert.ToInt32(textBoxCount.Text),
                     Summa = Convert.ToInt32(textBoxSum.Text)
                 });

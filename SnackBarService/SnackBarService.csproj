@@ -50,7 +50,7 @@
     <Compile Include="DataFromUser\BoundResElementModel.cs" />
     <Compile Include="DataListSingleton.cs" />
     <Compile Include="ImplementatoinsList\CustomerServiceList.cs" />
-    <Compile Include="ImplementatoinsList\ComponentServiceList.cs" />
+    <Compile Include="ImplementatoinsList\ElementServiceList.cs" />
     <Compile Include="ImplementatoinsList\EexecutorServiceList.cs" />
     <Compile Include="ImplementatoinsList\MainServiceList.cs" />
     <Compile Include="ImplementatoinsList\OutputServiceList.cs" />
@@ -67,7 +67,7 @@
     <Compile Include="ViewModel\ModelExecutorView.cs" />
     <Compile Include="ViewModel\ModelBookingView.cs" />
     <Compile Include="ViewModel\ModelProdElementView.cs" />
-    <Compile Include="ViewModel\ModelProductView.cs" />
+    <Compile Include="ViewModel\ModelOutputView.cs" />
     <Compile Include="ViewModel\ModelReserveElementView.cs" />
     <Compile Include="ViewModel\ModelReserveView.cs" />
   </ItemGroup>

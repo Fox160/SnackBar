@@ -19,12 +19,12 @@ namespace SnackBarService.ImplementationsList
         public List<ModelCustomerView> getList()
         {
             List<ModelCustomerView> result = new List<ModelCustomerView>();
-            for (int i = 0; i < source.Clients.Count; ++i)
+            for (int i = 0; i < source.Customers.Count; ++i)
             {
                 result.Add(new ModelCustomerView
                 {
-                    ID = source.Clients[i].ID,
-                    ClientFullName = source.Clients[i].ClientFullName
+                    ID = source.Customers[i].ID,
+                    CustomerFullName = source.Customers[i].CustomerFullName
                 });
             }
             return result;
@@ -32,14 +32,14 @@ namespace SnackBarService.ImplementationsList
 
         public ModelCustomerView getElement(int id)
         {
-            for (int i = 0; i < source.Clients.Count; ++i)
+            for (int i = 0; i < source.Customers.Count; ++i)
             {
-                if (source.Clients[i].ID == id)
+                if (source.Customers[i].ID == id)
                 {
                     return new ModelCustomerView
                     {
-                        ID = source.Clients[i].ID,
-                        ClientFullName = source.Clients[i].ClientFullName
+                        ID = source.Customers[i].ID,
+                        CustomerFullName = source.Customers[i].CustomerFullName
                     };
                 }
             }
@@ -49,42 +49,42 @@ namespace SnackBarService.ImplementationsList
         public void addElement(BoundCustomerModel model)
         {
             int maxID = 0;
-            for (int i = 0; i < source.Clients.Count; ++i)
+            for (int i = 0; i < source.Customers.Count; ++i)
             {
-                if (source.Clients[i].ID > maxID)
-                    maxID = source.Clients[i].ID;
-                if (source.Clients[i].ClientFullName == model.ClientFullName)
+                if (source.Customers[i].ID > maxID)
+                    maxID = source.Customers[i].ID;
+                if (source.Customers[i].CustomerFullName == model.CustomerFullName)
                     throw new Exception("Уже есть клиент с таким ФИО");
             }
-            source.Clients.Add(new Customer
+            source.Customers.Add(new Customer
             {
                 ID = maxID + 1,
-                ClientFullName = model.ClientFullName
+                CustomerFullName = model.CustomerFullName
             });
         }
 
         public void updateElement(BoundCustomerModel model)
         {
             int index = -1;
-            for (int i = 0; i < source.Clients.Count; ++i)
+            for (int i = 0; i < source.Customers.Count; ++i)
             {
-                if (source.Clients[i].ID == model.ID)
+                if (source.Customers[i].ID == model.ID)
                     index = i;
-                if (source.Clients[i].ClientFullName == model.ClientFullName && source.Clients[i].ID != model.ID)
+                if (source.Customers[i].CustomerFullName == model.CustomerFullName && source.Customers[i].ID != model.ID)
                     throw new Exception("Уже есть клиент с таким ФИО");
             }
             if (index == -1)
                 throw new Exception("Элемент не найден");
-            source.Clients[index].ClientFullName = model.ClientFullName;
+            source.Customers[index].CustomerFullName = model.CustomerFullName;
         }
 
         public void deleteElement(int id)
         {
-            for (int i = 0; i < source.Clients.Count; ++i)
+            for (int i = 0; i < source.Customers.Count; ++i)
             {
-                if (source.Clients[i].ID == id)
+                if (source.Customers[i].ID == id)
                 {
-                    source.Clients.RemoveAt(i);
+                    source.Customers.RemoveAt(i);
                     return;
                 }
             }

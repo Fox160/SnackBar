@@ -16,20 +16,20 @@ namespace SnackBarService.ImplementationsList
             source = DataListSingleton.GetInstance();
         }
 
-        public List<ModelProductView> getList()
+        public List<ModelOutputView> getList()
         {
-            List<ModelProductView> result = new List<ModelProductView>();
-            for (int i = 0; i < source.Products.Count; ++i)
+            List<ModelOutputView> result = new List<ModelOutputView>();
+            for (int i = 0; i < source.Outputs.Count; ++i)
             {
                 List<ModelProdElementView> productElements = new List<ModelProdElementView>();
-                for (int j = 0; j < source.ProductElements.Count; ++j)
+                for (int j = 0; j < source.OutputElements.Count; ++j)
                 {
-                    if (source.ProductElements[j].ProductID == source.Products[i].ID)
+                    if (source.OutputElements[j].OutputID == source.Outputs[i].ID)
                     {
                         string elementName = string.Empty;
                         for (int k = 0; k < source.Elements.Count; ++k)
                         {
-                            if (source.ProductElements[j].ElementID == source.Elements[k].ID)
+                            if (source.OutputElements[j].ElementID == source.Elements[k].ID)
                             {
                                 elementName = source.Elements[k].ElementName;
                                 break;
@@ -37,38 +37,38 @@ namespace SnackBarService.ImplementationsList
                         }
                         productElements.Add(new ModelProdElementView
                         {
-                            ID = source.ProductElements[j].ID,
-                            ProductID = source.ProductElements[j].ProductID,
-                            ElementID = source.ProductElements[j].ElementID,
+                            ID = source.OutputElements[j].ID,
+                            OutputID = source.OutputElements[j].OutputID,
+                            ElementID = source.OutputElements[j].ElementID,
                             ElementName = elementName,
-                            Count = source.ProductElements[j].Count
+                            Count = source.OutputElements[j].Count
                         });
                     }
                 }
-                result.Add(new ModelProductView
+                result.Add(new ModelOutputView
                 {
-                    ID = source.Products[i].ID,
-                    ProductName = source.Products[i].ProductName,
-                    Price = source.Products[i].Price,
-                    ProductElements = productElements
+                    ID = source.Outputs[i].ID,
+                    OutputName = source.Outputs[i].OutputName,
+                    Price = source.Outputs[i].Price,
+                    OutputElements = productElements
                 });
             }
             return result;
         }
 
-        public ModelProductView getElement(int id)
+        public ModelOutputView getElement(int id)
         {
-            for (int i = 0; i < source.Products.Count; ++i)
+            for (int i = 0; i < source.Outputs.Count; ++i)
             {
                 List<ModelProdElementView> productComponents = new List<ModelProdElementView>();
-                for (int j = 0; j < source.ProductElements.Count; ++j)
+                for (int j = 0; j < source.ReserveElements.Count; ++j)
                 {
-                    if (source.ProductElements[j].ProductID == source.Products[i].ID)
+                    if (source.OutputElements[j].OutputID == source.Outputs[i].ID)
                     {
                         string elementName = string.Empty;
                         for (int k = 0; k < source.Elements.Count; ++k)
                         {
-                            if (source.ProductElements[j].ElementID == source.Elements[k].ID)
+                            if (source.OutputElements[j].ElementID == source.Elements[k].ID)
                             {
                                 elementName = source.Elements[k].ElementName;
                                 break;
@@ -76,22 +76,22 @@ namespace SnackBarService.ImplementationsList
                         }
                         productComponents.Add(new ModelProdElementView
                         {
-                            ID = source.ProductElements[j].ID,
-                            ProductID = source.ProductElements[j].ProductID,
-                            ElementID = source.ProductElements[j].ElementID,
+                            ID = source.OutputElements[j].ID,
+                            OutputID = source.OutputElements[j].OutputID,
+                            ElementID = source.OutputElements[j].ElementID,
                             ElementName = elementName,
-                            Count = source.ProductElements[j].Count
+                            Count = source.OutputElements[j].Count
                         });
                     }
                 }
-                if (source.Products[i].ID == id)
+                if (source.Outputs[i].ID == id)
                 {
-                    return new ModelProductView
+                    return new ModelOutputView
                     {
-                        ID = source.Products[i].ID,
-                        ProductName = source.Products[i].ProductName,
-                        Price = source.Products[i].Price,
-                        ProductElements = productComponents
+                        ID = source.Outputs[i].ID,
+                        OutputName = source.Outputs[i].OutputName,
+                        Price = source.Outputs[i].Price,
+                        OutputElements = productComponents
                     };
                 }
             }
@@ -102,46 +102,46 @@ namespace SnackBarService.ImplementationsList
         public void addElement(BoundOutputModel model)
         {
             int maxID = 0;
-            for (int i = 0; i < source.Products.Count; ++i)
+            for (int i = 0; i < source.Outputs.Count; ++i)
             {
-                if (source.Products[i].ID > maxID)
-                    maxID = source.Products[i].ID;
-                if (source.Products[i].ProductName == model.ProductName)
+                if (source.Outputs[i].ID > maxID)
+                    maxID = source.Outputs[i].ID;
+                if (source.Outputs[i].OutputName == model.OutputName)
                     throw new Exception("Уже есть изделие с таким названием");
             }
-            source.Products.Add(new Output
+            source.Outputs.Add(new Output
             {
                 ID = maxID + 1,
-                ProductName = model.ProductName,
+                OutputName = model.OutputName,
                 Price = model.Price
             });
             int maxProductComponentID = 0;
-            for (int i = 0; i < source.ProductElements.Count; ++i)
+            for (int i = 0; i < source.OutputElements.Count; ++i)
             {
-                if (source.ProductElements[i].ID > maxProductComponentID)
+                if (source.OutputElements[i].ID > maxProductComponentID)
                 {
-                    maxProductComponentID = source.ProductElements[i].ID;
+                    maxProductComponentID = source.OutputElements[i].ID;
                 }
             }
-            for (int i = 0; i < model.ProductElements.Count; ++i)
+            for (int i = 0; i < model.OutputElements.Count; ++i)
             {
-                for (int j = 1; j < model.ProductElements.Count; ++j)
+                for (int j = 1; j < model.OutputElements.Count; ++j)
                 {
-                    if (model.ProductElements[i].ElementID == model.ProductElements[j].ElementID)
+                    if (model.OutputElements[i].ElementID == model.OutputElements[j].ElementID)
                     {
-                        model.ProductElements[i].Count += model.ProductElements[j].Count;
-                        model.ProductElements.RemoveAt(j--);
+                        model.OutputElements[i].Count += model.OutputElements[j].Count;
+                        model.OutputElements.RemoveAt(j--);
                     }
                 }
             }
-            for (int i = 0; i < model.ProductElements.Count; ++i)
+            for (int i = 0; i < model.OutputElements.Count; ++i)
             {
-                source.ProductElements.Add(new OutputElement
+                source.OutputElements.Add(new OutputElement
                 {
                     ID = ++maxProductComponentID,
-                    ProductID = maxID + 1,
-                    ElementID = model.ProductElements[i].ElementID,
-                    Count = model.ProductElements[i].Count
+                    OutputID = maxID + 1,
+                    ElementID = model.OutputElements[i].ElementID,
+                    Count = model.OutputElements[i].Count
                 });
             }
         }
@@ -149,66 +149,66 @@ namespace SnackBarService.ImplementationsList
         public void updateElement(BoundOutputModel model)
         {
             int index = -1;
-            for (int i = 0; i < source.Products.Count; ++i)
+            for (int i = 0; i < source.Outputs.Count; ++i)
             {
-                if (source.Products[i].ID == model.ID)
+                if (source.Outputs[i].ID == model.ID)
                     index = i;
-                if (source.Products[i].ProductName == model.ProductName && source.Products[i].ID != model.ID)
+                if (source.Outputs[i].OutputName == model.OutputName && source.Outputs[i].ID != model.ID)
                     throw new Exception("Уже есть изделие с таким названием");
             }
             if (index == -1)
                 throw new Exception("Элемент не найден");
 
-            source.Products[index].ProductName = model.ProductName;
-            source.Products[index].Price = model.Price;
+            source.Outputs[index].OutputName = model.OutputName;
+            source.Outputs[index].Price = model.Price;
             int maxProductComponentID = 0;
-            for (int i = 0; i < source.ProductElements.Count; ++i)
+            for (int i = 0; i < source.OutputElements.Count; ++i)
             {
-                if (source.ProductElements[i].ID > maxProductComponentID)
+                if (source.OutputElements[i].ID > maxProductComponentID)
                 {
-                    maxProductComponentID = source.ProductElements[i].ID;
+                    maxProductComponentID = source.OutputElements[i].ID;
                 }
             }
-            for (int i = 0; i < source.ProductElements.Count; ++i)
+            for (int i = 0; i < source.OutputElements.Count; ++i)
             {
-                if (source.ProductElements[i].ProductID == model.ID)
+                if (source.OutputElements[i].OutputID == model.ID)
                 {
                     bool flag = true;
-                    for (int j = 0; j < model.ProductElements.Count; ++j)
+                    for (int j = 0; j < model.OutputElements.Count; ++j)
                     {
-                        if (source.ProductElements[i].ID == model.ProductElements[j].ID)
+                        if (source.OutputElements[i].ID == model.OutputElements[j].ID)
                         {
-                            source.ProductElements[i].Count = model.ProductElements[j].Count;
+                            source.OutputElements[i].Count = model.OutputElements[j].Count;
                             flag = false;
                             break;
                         }
                     }
                     if (flag)
-                        source.ProductElements.RemoveAt(i--);
+                        source.OutputElements.RemoveAt(i--);
                 }
             }
-            for (int i = 0; i < model.ProductElements.Count; ++i)
+            for (int i = 0; i < model.OutputElements.Count; ++i)
             {
-                if (model.ProductElements[i].ID == 0)
+                if (model.OutputElements[i].ID == 0)
                 {
-                    for (int j = 0; j < source.ProductElements.Count; ++j)
+                    for (int j = 0; j < source.OutputElements.Count; ++j)
                     {
-                        if (source.ProductElements[j].ProductID == model.ID &&
-                            source.ProductElements[j].ElementID == model.ProductElements[i].ElementID)
+                        if (source.OutputElements[j].OutputID == model.ID &&
+                            source.OutputElements[j].ElementID == model.OutputElements[i].ElementID)
                         {
-                            source.ProductElements[j].Count += model.ProductElements[i].Count;
-                            model.ProductElements[i].ID = source.ProductElements[j].ID;
+                            source.OutputElements[j].Count += model.OutputElements[i].Count;
+                            model.OutputElements[i].ID = source.OutputElements[j].ID;
                             break;
                         }
                     }
-                    if (model.ProductElements[i].ID == 0)
+                    if (model.OutputElements[i].ID == 0)
                     {
-                        source.ProductElements.Add(new OutputElement
+                        source.OutputElements.Add(new OutputElement
                         {
                             ID = ++maxProductComponentID,
-                            ProductID = model.ID,
-                            ElementID = model.ProductElements[i].ElementID,
-                            Count = model.ProductElements[i].Count
+                            OutputID = model.ID,
+                            ElementID = model.OutputElements[i].ElementID,
+                            Count = model.OutputElements[i].Count
                         });
                     }
                 }
@@ -217,16 +217,16 @@ namespace SnackBarService.ImplementationsList
 
         public void deleteElement(int id)
         {
-            for (int i = 0; i < source.ProductElements.Count; ++i)
+            for (int i = 0; i < source.OutputElements.Count; ++i)
             {
-                if (source.ProductElements[i].ProductID == id)
-                    source.ProductElements.RemoveAt(i--);
+                if (source.OutputElements[i].OutputID == id)
+                    source.OutputElements.RemoveAt(i--);
             }
-            for (int i = 0; i < source.Products.Count; ++i)
+            for (int i = 0; i < source.Outputs.Count; ++i)
             {
-                if (source.Products[i].ID == id)
+                if (source.Outputs[i].ID == id)
                 {
-                    source.Products.RemoveAt(i);
+                    source.Outputs.RemoveAt(i);
                     return;
                 }
             }

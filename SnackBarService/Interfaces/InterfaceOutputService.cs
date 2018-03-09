@@ -6,9 +6,9 @@ namespace SnackBarService.Interfaces
 {
     public interface InterfaceOutputService
     {
-        List<ModelProductView> getList();
+        List<ModelOutputView> getList();
 
-        ModelProductView getElement(int id);
+        ModelOutputView getElement(int id);
 
         void addElement(BoundOutputModel model);
 

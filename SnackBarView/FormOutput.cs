@@ -34,12 +34,12 @@ namespace SnackBarView
             {
                 try
                 {
-                    ModelProductView view = service.getElement(id.Value);
+                    ModelOutputView view = service.getElement(id.Value);
                     if (view != null)
                     {
-                        textBoxName.Text = view.ProductName;
+                        textBoxName.Text = view.OutputName;
                         textBoxPrice.Text = view.Price.ToString();
-                        productElements = view.ProductElements;
+                        productElements = view.OutputElements;
                         LoadData();
                     }
                 }
@@ -80,7 +80,7 @@ namespace SnackBarView
                 if (form.Model != null)
                 {
                     if (id.HasValue)
-                        form.Model.ProductID = id.Value;
+                        form.Model.OutputID = id.Value;
                     productElements.Add(form.Model);
                 }
                 LoadData();
@@ -150,7 +150,7 @@ namespace SnackBarView
                     productComponentBM.Add(new BoundProdElementModel
                     {
                         ID = productElements[i].ID,
-                        ProductID = productElements[i].ProductID,
+                        OutputID = productElements[i].OutputID,
                         ElementID = productElements[i].ElementID,
                         Count = productElements[i].Count
                     });
@@ -160,18 +160,18 @@ namespace SnackBarView
                     service.updateElement(new BoundOutputModel
                     {
                         ID = id.Value,
-                        ProductName = textBoxName.Text,
+                        OutputName = textBoxName.Text,
                         Price = Convert.ToInt32(textBoxPrice.Text),
-                        ProductElements = productComponentBM
+                        OutputElements = productComponentBM
                     });
                 }
                 else
                 {
                     service.addElement(new BoundOutputModel
                     {
-                        ProductName = textBoxName.Text,
+                        OutputName = textBoxName.Text,
                         Price = Convert.ToInt32(textBoxPrice.Text),
-                        ProductElements = productComponentBM
+                        OutputElements = productComponentBM
                     });
                 }
                 MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);

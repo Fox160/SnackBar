@@ -4,6 +4,6 @@
     {
         public int ID { get; set; }
 
-        public string ClientFullName { get; set; }
+        public string CustomerFullName { get; set; }
     }
 }

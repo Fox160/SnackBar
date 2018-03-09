@@ -30,7 +30,7 @@ namespace SnackBarView
         {
             try
             {
-                List<ModelProductView> list = service.getList();
+                List<ModelOutputView> list = service.getList();
                 if (list != null)
                 {
                     dataGridViewProducts.DataSource = list;

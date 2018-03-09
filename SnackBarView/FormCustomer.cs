@@ -33,7 +33,7 @@ namespace SnackBarView
                 {
                     ModelCustomerView view = service.getElement(id.Value);
                     if (view != null)
-                        textBoxFullName.Text = view.ClientFullName;
+                        textBoxFullName.Text = view.CustomerFullName;
                 }
                 catch (Exception ex)
                 {
@@ -56,14 +56,14 @@ namespace SnackBarView
                     service.updateElement(new BoundCustomerModel
                     {
                         ID = id.Value,
-                        ClientFullName = textBoxFullName.Text
+                        CustomerFullName = textBoxFullName.Text
                     });
                 }
                 else
                 {
                     service.addElement(new BoundCustomerModel
                     {
-                        ClientFullName = textBoxFullName.Text
+                        CustomerFullName = textBoxFullName.Text
                     });
                 }
                 MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);

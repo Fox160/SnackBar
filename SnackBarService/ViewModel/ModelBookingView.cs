@@ -1,16 +1,16 @@
 ﻿namespace SnackBarService.ViewModel
 {
-    public class OrderViewModel
+    public class ModelBookingView
     {
         public int ID { get; set; }
 
-        public int ClientID { get; set; }
+        public int CustomerID { get; set; }
 
-        public string ClientFullName { get; set; }
+        public string CustomerFullName { get; set; }
 
-        public int ProductID { get; set; }
+        public int OutputID { get; set; }
 
-        public string ProductName { get; set; }
+        public string OutputName { get; set; }
 
         public int? ExecutorID { get; set; }
 

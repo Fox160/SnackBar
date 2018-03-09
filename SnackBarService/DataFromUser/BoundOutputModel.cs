@@ -10,10 +10,10 @@ namespace SnackBarService.DataFromUser
     {
         public int ID { get; set; }
 
-        public string ProductName { get; set; }
+        public string OutputName { get; set; }
 
         public decimal Price { get; set; }
 
-        public List<BoundProdElementModel> ProductElements { get; set; }
+        public List<BoundProdElementModel> OutputElements { get; set; }
     }
 }

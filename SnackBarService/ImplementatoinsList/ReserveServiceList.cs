@@ -29,7 +29,7 @@ namespace SnackBarService.ImplementationsList
                         string componentName = string.Empty;
                         for (int k = 0; k < source.Elements.Count; ++k)
                         {
-                            if (source.ProductElements[j].ElementID == source.Elements[k].ID)
+                            if (source.OutputElements[j].ElementID == source.Elements[k].ID)
                             {
                                 componentName = source.Elements[k].ElementName;
                                 break;
@@ -67,7 +67,7 @@ namespace SnackBarService.ImplementationsList
                         string componentName = string.Empty;
                         for (int k = 0; k < source.Elements.Count; ++k)
                         {
-                            if (source.ProductElements[j].ElementID == source.Elements[k].ID)
+                            if (source.OutputElements[j].ElementID == source.Elements[k].ID)
                             {
                                 componentName = source.Elements[k].ElementName;
                                 break;

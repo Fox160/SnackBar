@@ -11,17 +11,17 @@ namespace SnackBarModel
     {
         private static DataListSingleton instance;
 
-        public List<Customer> Clients { get; set; }
+        public List<Customer> Customers { get; set; }
 
         public List<Element> Elements { get; set; }
 
         public List<Executor> Executors { get; set; }
 
-        public List<Booking> Orders { get; set; }
+        public List<Booking> Bookings { get; set; }
 
-        public List<Output> Products { get; set; }
+        public List<Output> Outputs { get; set; }
 
-        public List<OutputElement> ProductElements { get; set; }
+        public List<OutputElement> OutputElements { get; set; }
 
         public List<Reserve> Reserves { get; set; }
 
@@ -29,12 +29,12 @@ namespace SnackBarModel
 
         private DataListSingleton()
         {
-            Clients = new List<Customer>();
+            Customers = new List<Customer>();
             Elements = new List<Element>();
             Executors = new List<Executor>();
-            Orders = new List<Booking>();
-            Products = new List<Output>();
-            ProductElements = new List<OutputElement>();
+            Bookings = new List<Booking>();
+            Outputs = new List<Output>();
+            OutputElements = new List<OutputElement>();
             Reserves = new List<Reserve>();
             ReserveElements = new List<ReserveElement>();
         }
