@@ -51,7 +51,7 @@
     <Compile Include="DataListSingleton.cs" />
     <Compile Include="ImplementatoinsList\CustomerServiceList.cs" />
     <Compile Include="ImplementatoinsList\ElementServiceList.cs" />
-    <Compile Include="ImplementatoinsList\EexecutorServiceList.cs" />
+    <Compile Include="ImplementatoinsList\ExecutorServiceList.cs" />
     <Compile Include="ImplementatoinsList\MainServiceList.cs" />
     <Compile Include="ImplementatoinsList\OutputServiceList.cs" />
     <Compile Include="ImplementatoinsList\ReserveServiceList.cs" />

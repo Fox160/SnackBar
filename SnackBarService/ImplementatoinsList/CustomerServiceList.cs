@@ -4,14 +4,15 @@ using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SnackBarService.ImplementationsList
 {
-    public class ClientServiceList : InterfaceCustomerService
+    public class CustomerserviceList : InterfaceCustomerService
     {
         private DataListSingleton source;
 
-        public ClientServiceList()
+        public CustomerserviceList()
         {
             source = DataListSingleton.GetInstance();
         }

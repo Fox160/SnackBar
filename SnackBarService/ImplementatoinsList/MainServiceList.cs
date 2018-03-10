@@ -4,6 +4,7 @@ using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SnackBarService.ImplementationsList
 {
@@ -21,21 +22,21 @@ namespace SnackBarService.ImplementationsList
             List<ModelBookingView> result = new List<ModelBookingView>();
             for (int i = 0; i < source.Bookings.Count; ++i)
             {
-                string clientFullName = string.Empty;
+                string CustomerFullName = string.Empty;
                 for (int j = 0; j < source.Customers.Count; ++j)
                 {
                     if (source.Customers[j].ID == source.Bookings[i].CustomerID)
                     {
-                        clientFullName = source.Customers[j].CustomerFullName;
+                        CustomerFullName = source.Customers[j].CustomerFullName;
                         break;
                     }
                 }
-                string productName = string.Empty;
+                string OutputName = string.Empty;
                 for (int j = 0; j < source.Outputs.Count; ++j)
                 {
                     if (source.Outputs[j].ID == source.Bookings[i].OutputID)
                     {
-                        productName = source.Outputs[j].OutputName;
+                        OutputName = source.Outputs[j].OutputName;
                         break;
                     }
                 }
@@ -55,9 +56,9 @@ namespace SnackBarService.ImplementationsList
                 {
                     ID = source.Bookings[i].ID,
                     CustomerID = source.Bookings[i].CustomerID,
-                    CustomerFullName = clientFullName,
+                    CustomerFullName = CustomerFullName,
                     OutputID = source.Bookings[i].OutputID,
-                    OutputName = productName,
+                    OutputName = OutputName,
                     ExecutorID = source.Bookings[i].ExecutorID,
                     ExecutorName = executorFullName,
                     Count = source.Bookings[i].Count,

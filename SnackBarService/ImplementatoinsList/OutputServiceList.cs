@@ -4,14 +4,15 @@ using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SnackBarService.ImplementationsList
 {
-    public class ProductServiceList : InterfaceOutputService
+    public class OutputserviceList : InterfaceOutputService
     {
         private DataListSingleton source;
 
-        public ProductServiceList()
+        public OutputserviceList()
         {
             source = DataListSingleton.GetInstance();
         }
@@ -21,7 +22,7 @@ namespace SnackBarService.ImplementationsList
             List<ModelOutputView> result = new List<ModelOutputView>();
             for (int i = 0; i < source.Outputs.Count; ++i)
             {
-                List<ModelProdElementView> productElements = new List<ModelProdElementView>();
+                List<ModelProdElementView> OutputElements = new List<ModelProdElementView>();
                 for (int j = 0; j < source.OutputElements.Count; ++j)
                 {
                     if (source.OutputElements[j].OutputID == source.Outputs[i].ID)
@@ -35,7 +36,7 @@ namespace SnackBarService.ImplementationsList
                                 break;
                             }
                         }
-                        productElements.Add(new ModelProdElementView
+                        OutputElements.Add(new ModelProdElementView
                         {
                             ID = source.OutputElements[j].ID,
                             OutputID = source.OutputElements[j].OutputID,
@@ -50,7 +51,7 @@ namespace SnackBarService.ImplementationsList
                     ID = source.Outputs[i].ID,
                     OutputName = source.Outputs[i].OutputName,
                     Price = source.Outputs[i].Price,
-                    OutputElements = productElements
+                    OutputElements = OutputElements
                 });
             }
             return result;
@@ -61,7 +62,7 @@ namespace SnackBarService.ImplementationsList
             for (int i = 0; i < source.Outputs.Count; ++i)
             {
                 List<ModelProdElementView> productComponents = new List<ModelProdElementView>();
-                for (int j = 0; j < source.ReserveElements.Count; ++j)
+                for (int j = 0; j < source.OutputElements.Count; ++j)
                 {
                     if (source.OutputElements[j].OutputID == source.Outputs[i].ID)
                     {
