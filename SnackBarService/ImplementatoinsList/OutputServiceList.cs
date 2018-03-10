@@ -8,11 +8,11 @@ using System.Linq;
 
 namespace SnackBarService.ImplementationsList
 {
-    public class ProductServiceList : InterfaceOutputService
+    public class OutputServiceList : InterfaceOutputService
     {
         private DataListSingleton source;
 
-        public ProductServiceList()
+        public OutputServiceList()
         {
             source = DataListSingleton.GetInstance();
         }
