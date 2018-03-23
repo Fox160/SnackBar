@@ -19,77 +19,67 @@ namespace SnackBarService.ImplementationsList
 
         public List<ModelExecutorView> getList()
         {
-            List<ModelExecutorView> result = new List<ModelExecutorView>();
-            for (int i = 0; i < source.Executors.Count; ++i)
-            {
-                result.Add(new ModelExecutorView
+            List<ModelExecutorView> result = source.Executors
+                .Select(rec => new ModelExecutorView
                 {
-                    ID = source.Executors[i].ID,
-                    ExecutorFullName = source.Executors[i].ExecutorFullName
-                });
-            }
+                    ID = rec.ID,
+                    ExecutorFullName = rec.ExecutorFullName
+                })
+                .ToList();
             return result;
         }
 
         public ModelExecutorView getElement(int id)
         {
-            for (int i = 0; i < source.Executors.Count; ++i)
+            Executor element = source.Executors.FirstOrDefault(rec => rec.ID == id);
+            if (element != null)
             {
-                if (source.Executors[i].ID == id)
+                return new ModelExecutorView
                 {
-                    return new ModelExecutorView
-                    {
-                        ID = source.Executors[i].ID,
-                        ExecutorFullName = source.Executors[i].ExecutorFullName
-                    };
-                }
+                    ID = element.ID,
+                    ExecutorFullName = element.ExecutorFullName
+                };
             }
             throw new Exception("Элемент не найден");
         }
 
         public void addElement(BoundExecutorModel model)
         {
-            int maxID = 0;
-            for (int i = 0; i < source.Executors.Count; ++i)
+            Executor element = source.Executors.FirstOrDefault(rec => rec.ExecutorFullName == model.ExecutorFullName);
+            if (element != null)
             {
-                if (source.Executors[i].ID > maxID)
-                    maxID = source.Executors[i].ID;
-                if (source.Executors[i].ExecutorFullName == model.ExecutorFullName)
-                    throw new Exception("Уже есть сотрудник с таким ФИО");
+                throw new Exception("Уже есть сотрудник с таким ФИО");
             }
+            int maxId = source.Executors.Count > 0 ? source.Executors.Max(rec => rec.ID) : 0;
             source.Executors.Add(new Executor
             {
-                ID = maxID + 1,
+                ID = maxId + 1,
                 ExecutorFullName = model.ExecutorFullName
             });
         }
 
         public void updateElement(BoundExecutorModel model)
         {
-            int index = -1;
-            for (int i = 0; i < source.Executors.Count; ++i)
+            Executor element = source.Executors.FirstOrDefault(rec =>
+                                        rec.ExecutorFullName == model.ExecutorFullName && rec.ID != model.ID);
+            if (element != null)
             {
-                if (source.Executors[i].ID == model.ID)
-                    index = i;
-                if (source.Executors[i].ExecutorFullName == model.ExecutorFullName && source.Executors[i].ID != model.ID)
-                    throw new Exception("Уже есть сотрудник с таким ФИО");
+                throw new Exception("Уже есть сотрудник с таким ФИО");
             }
-            if (index == -1)
+            element = source.Executors.FirstOrDefault(rec => rec.ID == model.ID);
+            if (element == null)
                 throw new Exception("Элемент не найден");
-            source.Executors[index].ExecutorFullName = model.ExecutorFullName;
+
+            element.ExecutorFullName = model.ExecutorFullName;
         }
 
         public void deleteElement(int id)
         {
-            for (int i = 0; i < source.Executors.Count; ++i)
-            {
-                if (source.Executors[i].ID == id)
-                {
-                    source.Executors.RemoveAt(i);
-                    return;
-                }
-            }
-            throw new Exception("Элемент не найден");
+            Executor element = source.Executors.FirstOrDefault(rec => rec.ID == id);
+            if (element != null)
+                source.Executors.Remove(element);
+            else
+                throw new Exception("Элемент не найден");
         }
     }
 }

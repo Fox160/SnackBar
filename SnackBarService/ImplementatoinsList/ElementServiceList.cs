@@ -19,77 +19,62 @@ namespace SnackBarService.ImplementationsList
 
         public List<ModelElementView> getList()
         {
-            List<ModelElementView> result = new List<ModelElementView>();
-            for (int i = 0; i < source.Elements.Count; ++i)
-            {
-                result.Add(new ModelElementView
-                {
-                    ID = source.Elements[i].ID,
-                    ElementName = source.Elements[i].ElementName
-                });
-            }
+            List<ModelElementView> result = source.Elements
+               .Select(rec => new ModelElementView
+               {
+                   ID = rec.ID,
+                   ElementName = rec.ElementName
+               })
+               .ToList();
             return result;
         }
 
         public ModelElementView getElement(int id)
         {
-            for (int i = 0; i < source.Elements.Count; ++i)
+            Element element = source.Elements.FirstOrDefault(rec => rec.ID == id);
+            if (element != null)
             {
-                if (source.Elements[i].ID == id)
+                return new ModelElementView
                 {
-                    return new ModelElementView
-                    {
-                        ID = source.Elements[i].ID,
-                        ElementName = source.Elements[i].ElementName
-                    };
-                }
+                    ID = element.ID,
+                    ElementName = element.ElementName
+                };
             }
             throw new Exception("Элемент не найден");
         }
 
         public void addElement(BoundElementModel model)
         {
-            int maxID = 0;
-            for (int i = 0; i < source.Elements.Count; ++i)
-            {
-                if (source.Elements[i].ID > maxID)
-                    maxID = source.Elements[i].ID;
-                if (source.Elements[i].ElementName == model.ElementName)
-                    throw new Exception("Уже есть компонент с таким названием");
-            }
+            Element element = source.Elements.FirstOrDefault(rec => rec.ElementName == model.ElementName);
+            if (element != null)
+                throw new Exception("Уже есть компонент с таким названием");
+            int maxId = source.Elements.Count > 0 ? source.Elements.Max(rec => rec.ID) : 0;
             source.Elements.Add(new Element
             {
-                ID = maxID + 1,
+                ID = maxId + 1,
                 ElementName = model.ElementName
             });
         }
 
         public void updateElement(BoundElementModel model)
         {
-            int index = -1;
-            for (int i = 0; i < source.Elements.Count; ++i)
-            {
-                if (source.Elements[i].ID == model.ID)
-                    index = i;
-                if (source.Elements[i].ElementName == model.ElementName && source.Elements[i].ID != model.ID)
-                    throw new Exception("Уже есть компонент с таким названием");
-            }
-            if (index == -1)
+            Element element = source.Elements.FirstOrDefault(rec =>
+                                        rec.ElementName == model.ElementName && rec.ID != model.ID);
+            if (element != null)
+                throw new Exception("Уже есть компонент с таким названием");
+            element = source.Elements.FirstOrDefault(rec => rec.ID == model.ID);
+            if (element == null)
                 throw new Exception("Элемент не найден");
-            source.Elements[index].ElementName = model.ElementName;
+            element.ElementName = model.ElementName;
         }
 
         public void deleteElement(int id)
         {
-            for (int i = 0; i < source.Elements.Count; ++i)
-            {
-                if (source.Elements[i].ID == id)
-                {
-                    source.Elements.RemoveAt(i);
-                    return;
-                }
-            }
-            throw new Exception("Элемент не найден");
+            Element element = source.Elements.FirstOrDefault(rec => rec.ID == id);
+            if (element != null)
+                source.Elements.Remove(element);
+            else
+                throw new Exception("Элемент не найден");
         }
     }
 }

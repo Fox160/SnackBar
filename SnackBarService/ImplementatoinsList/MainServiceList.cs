@@ -19,69 +19,35 @@ namespace SnackBarService.ImplementationsList
 
         public List<ModelBookingView> getList()
         {
-            List<ModelBookingView> result = new List<ModelBookingView>();
-            for (int i = 0; i < source.Bookings.Count; ++i)
-            {
-                string CustomerFullName = string.Empty;
-                for (int j = 0; j < source.Customers.Count; ++j)
+            List<ModelBookingView> result = source.Bookings
+                .Select(rec => new ModelBookingView
                 {
-                    if (source.Customers[j].ID == source.Bookings[i].CustomerID)
-                    {
-                        CustomerFullName = source.Customers[j].CustomerFullName;
-                        break;
-                    }
-                }
-                string OutputName = string.Empty;
-                for (int j = 0; j < source.Outputs.Count; ++j)
-                {
-                    if (source.Outputs[j].ID == source.Bookings[i].OutputID)
-                    {
-                        OutputName = source.Outputs[j].OutputName;
-                        break;
-                    }
-                }
-                string executorFullName = string.Empty;
-                if (source.Bookings[i].ExecutorID.HasValue)
-                {
-                    for (int j = 0; j < source.Executors.Count; ++j)
-                    {
-                        if (source.Executors[j].ID == source.Bookings[i].ExecutorID.Value)
-                        {
-                            executorFullName = source.Executors[j].ExecutorFullName;
-                            break;
-                        }
-                    }
-                }
-                result.Add(new ModelBookingView
-                {
-                    ID = source.Bookings[i].ID,
-                    CustomerID = source.Bookings[i].CustomerID,
-                    CustomerFullName = CustomerFullName,
-                    OutputID = source.Bookings[i].OutputID,
-                    OutputName = OutputName,
-                    ExecutorID = source.Bookings[i].ExecutorID,
-                    ExecutorName = executorFullName,
-                    Count = source.Bookings[i].Count,
-                    Summa = source.Bookings[i].Summa,
-                    DateOfCreate = source.Bookings[i].DateOfCreate.ToLongDateString(),
-                    DateOfImplement = source.Bookings[i].DateOfImplement?.ToLongDateString(),
-                    Status = source.Bookings[i].Status.ToString()
-                });
-            }
+                    ID = rec.ID,
+                    CustomerID = rec.CustomerID,
+                    OutputID = rec.OutputID,
+                    ExecutorID = rec.ExecutorID,
+                    DateOfCreate = rec.DateOfCreate.ToLongDateString(),
+                    DateOfImplement = rec.DateOfImplement?.ToLongDateString(),
+                    Status = rec.Status.ToString(),
+                    Count = rec.Count,
+                    Summa = rec.Summa,
+                    CustomerFullName = source.Customers
+                                    .FirstOrDefault(recC => recC.ID == rec.CustomerID)?.CustomerFullName,
+                    OutputName = source.Outputs
+                                    .FirstOrDefault(recP => recP.ID == rec.OutputID)?.OutputName,
+                    ExecutorName = source.Executors
+                                    .FirstOrDefault(recI => recI.ID == rec.ExecutorID)?.ExecutorFullName
+                })
+                .ToList();
             return result;
         }
 
         public void createOrder(BoundBookingModel model)
         {
-            int maxID = 0;
-            for (int i = 0; i < source.Bookings.Count; ++i)
-            {
-                if (source.Bookings[i].ID > maxID)
-                    maxID = source.Customers[i].ID;
-            }
+            int maxId = source.Bookings.Count > 0 ? source.Bookings.Max(rec => rec.ID) : 0;
             source.Bookings.Add(new Booking
             {
-                ID = maxID + 1,
+                ID = maxId + 1,
                 CustomerID = model.CustomerID,
                 OutputID = model.OutputID,
                 DateOfCreate = DateTime.Now,
@@ -93,119 +59,89 @@ namespace SnackBarService.ImplementationsList
 
         public void takeOrderInWork(BoundBookingModel model)
         {
-            int index = -1;
-            for (int i = 0; i < source.Bookings.Count; ++i)
+            Booking element = source.Bookings.FirstOrDefault(rec => rec.ID == model.ID);
+            if (element == null)
             {
-                if (source.Bookings[i].ID == model.ID)
-                {
-                    index = i;
-                    break;
-                }
-            }
-            if (index == -1)
                 throw new Exception("Элемент не найден");
-            for (int i = 0; i < source.OutputElements.Count; ++i)
+            }
+            var productComponents = source.OutputElements.Where(rec => rec.OutputID == element.OutputID);
+            foreach (var productComponent in productComponents)
             {
-                if (source.OutputElements[i].OutputID == source.Bookings[index].OutputID)
+                int countOnStocks = source.ReserveElements
+                                            .Where(rec => rec.ElementID == productComponent.ElementID)
+                                            .Sum(rec => rec.Count);
+                if (countOnStocks < productComponent.Count * element.Count)
                 {
-                    int countOnStocks = 0;
-                    for (int j = 0; j < source.ReserveElements.Count; ++j)
+                    var componentName = source.Elements
+                                    .FirstOrDefault(rec => rec.ID == productComponent.ElementID);
+                    throw new Exception("Не достаточно компонента " + componentName?.ElementName +
+                        " требуется " + productComponent.Count + ", в наличии " + countOnStocks);
+                }
+            }
+            foreach (var productComponent in productComponents)
+            {
+                int countOnStocks = productComponent.Count * element.Count;
+                var stockComponents = source.ReserveElements
+                                            .Where(rec => rec.ElementID == productComponent.ElementID);
+                foreach (var stockComponent in stockComponents)
+                {
+                    if (stockComponent.Count >= countOnStocks)
                     {
-                        if (source.ReserveElements[j].ElementID == source.OutputElements[i].ElementID)
-                            countOnStocks += source.ReserveElements[j].Count;
+                        stockComponent.Count -= countOnStocks;
+                        break;
                     }
-                    if (countOnStocks < source.OutputElements[i].Count * source.Bookings[index].Count)
+                    else
                     {
-                        for (int j = 0; j < source.Elements.Count; ++j)
-                        {
-                            if (source.Elements[j].ID == source.OutputElements[i].ElementID)
-                                throw new Exception("Не достаточно компонента " + source.Elements[j].ElementName +
-                                    " требуется " + source.OutputElements[i].Count + ", в наличии " + countOnStocks);
-                        }
+                        countOnStocks -= stockComponent.Count;
+                        stockComponent.Count = 0;
                     }
                 }
             }
-            for (int i = 0; i < source.OutputElements.Count; ++i)
-            {
-                if (source.OutputElements[i].OutputID == source.Bookings[index].OutputID)
-                {
-                    int countOnStocks = source.OutputElements[i].Count * source.Bookings[index].Count;
-                    for (int j = 0; j < source.ReserveElements.Count; ++j)
-                    {
-                        if (source.ReserveElements[j].ElementID == source.OutputElements[i].ElementID)
-                        {
-                            if (source.ReserveElements[j].Count >= countOnStocks)
-                            {
-                                source.ReserveElements[j].Count -= countOnStocks;
-                                break;
-                            }
-                            else
-                            {
-                                countOnStocks -= source.ReserveElements[j].Count;
-                                source.ReserveElements[j].Count = 0;
-                            }
-                        }
-                    }
-                }
-            }
-            source.Bookings[index].ExecutorID = model.ExecutorID;
-            source.Bookings[index].DateOfImplement = DateTime.Now;
-            source.Bookings[index].Status = StatusOfBooking.Выполняемый;
+            element.ExecutorID = model.ExecutorID;
+            element.DateOfImplement = DateTime.Now;
+            element.Status = StatusOfBooking.Выполняемый;
         }
 
         public void finishOrder(int id)
         {
-            int index = -1;
-            for (int i = 0; i < source.Bookings.Count; ++i)
+            Booking element = source.Bookings.FirstOrDefault(rec => rec.ID == id);
+            if (element == null)
             {
-                if (source.Customers[i].ID == id)
-                {
-                    index = i;
-                    break;
-                }
-            }
-            if (index == -1)
                 throw new Exception("Элемент не найден");
-            source.Bookings[index].Status = StatusOfBooking.Готов;
+            }
+            element.Status = StatusOfBooking.Готов;
         }
 
         public void payOrder(int id)
         {
-            int index = -1;
-            for (int i = 0; i < source.Bookings.Count; ++i)
+            Booking element = source.Bookings.FirstOrDefault(rec => rec.ID == id);
+            if (element == null)
             {
-                if (source.Customers[i].ID == id)
-                {
-                    index = i;
-                    break;
-                }
-            }
-            if (index == -1)
                 throw new Exception("Элемент не найден");
-            source.Bookings[index].Status = StatusOfBooking.Оплаченный;
+            }
+            element.Status = StatusOfBooking.Оплаченный;
         }
 
         public void putComponentOnReserve(BoundResElementModel model)
         {
-            int maxID = 0;
-            for (int i = 0; i < source.ReserveElements.Count; ++i)
+            ReserveElement element = source.ReserveElements
+                                                .FirstOrDefault(rec => rec.ReserveID == model.ReserveID &&
+                                                                    rec.ElementID == model.ElementID);
+            if (element != null)
             {
-                if (source.ReserveElements[i].ReserveID == model.ReserveID &&
-                    source.ReserveElements[i].ElementID == model.ElementID)
-                {
-                    source.ReserveElements[i].Count += model.Count;
-                    return;
-                }
-                if (source.ReserveElements[i].ID > maxID)
-                    maxID = source.ReserveElements[i].ID;
+                element.Count += model.Count;
             }
-            source.ReserveElements.Add(new ReserveElement
+            else
             {
-                ID = ++maxID,
-                ReserveID = model.ReserveID,
-                ElementID = model.ElementID,
-                Count = model.Count
-            });
+                int maxId = source.ReserveElements.Count > 0 ? source.ReserveElements.Max(rec => rec.ID) : 0;
+                source.ReserveElements.Add(new ReserveElement
+                {
+                    ID = ++maxId,
+                    ReserveID = model.ElementID,
+                    ElementID = model.ElementID,
+                    Count = model.Count
+                });
+            }
         }
     }
 }
