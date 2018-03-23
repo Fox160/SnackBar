@@ -15,5 +15,9 @@ namespace SnackBarModel
         public int ElementID { get; set; }
 
         public int Count { get; set; }
+
+        public virtual Output Output { get; set; }
+
+        public virtual Element Element { get; set; }
     }
 }

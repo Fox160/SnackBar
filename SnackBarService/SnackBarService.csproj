@@ -30,7 +30,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -40,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractDbContext.cs" />
     <Compile Include="DataFromUser\BoundCustomerModel.cs" />
     <Compile Include="DataFromUser\BoundElementModel.cs" />
     <Compile Include="DataFromUser\BoundExecutorModel.cs" />
@@ -49,6 +57,12 @@
     <Compile Include="DataFromUser\BoundReserveModel.cs" />
     <Compile Include="DataFromUser\BoundResElementModel.cs" />
     <Compile Include="DataListSingleton.cs" />
+    <Compile Include="ImplementationsDB\CustomerServiceDB.cs" />
+    <Compile Include="ImplementationsDB\ElementServiceDB.cs" />
+    <Compile Include="ImplementationsDB\ExecutorServiceDB.cs" />
+    <Compile Include="ImplementationsDB\MainServiceDB.cs" />
+    <Compile Include="ImplementationsDB\OutputServiceDB.cs" />
+    <Compile Include="ImplementationsDB\ReserveServiceDB.cs" />
     <Compile Include="ImplementatoinsList\CustomerServiceList.cs" />
     <Compile Include="ImplementatoinsList\ElementServiceList.cs" />
     <Compile Include="ImplementatoinsList\ExecutorServiceList.cs" />
@@ -61,6 +75,11 @@
     <Compile Include="Interfaces\InterfaceMainService.cs" />
     <Compile Include="Interfaces\InterfaceOutputService.cs" />
     <Compile Include="Interfaces\InterfaceReserveService.cs" />
+    <Compile Include="Migrations\201803231923314_FirstMigration.cs" />
+    <Compile Include="Migrations\201803231923314_FirstMigration.Designer.cs">
+      <DependentUpon>201803231923314_FirstMigration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModel\ModelCustomerView.cs" />
     <Compile Include="ViewModel\ModelElementView.cs" />
@@ -77,7 +96,15 @@
       <Name>SnackBarModel</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201803231923314_FirstMigration.resx">
+      <DependentUpon>201803231923314_FirstMigration.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

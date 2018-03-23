@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SnackBarService;
+using SnackBarService.ImplementationsDB;
 using SnackBarService.ImplementationsList;
 using SnackBarService.Interfaces;
 using Unity;
@@ -28,12 +31,14 @@ namespace SnackBarView
         public static IUnityContainer BuildUnityContainer()
         {
             var currentContainer = new UnityContainer();
-            currentContainer.RegisterType<InterfaceCustomerService, ClientServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceComponentService, ComponentServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceExecutorService, ExecutorServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceOutputService, ProductServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceReserveService, ReserveServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceMainService, MainServiceList>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<DbContext, AbstractDbContext>(new HierarchicalLifetimeManager());
+
+            currentContainer.RegisterType<InterfaceCustomerService, CustomerServiceDB>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceComponentService, ElementServiceDB>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceExecutorService, ExecutorServiceDB>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceOutputService, OutputServiceDB>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceReserveService, ReserveServiceDB>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceMainService, MainServiceBD>(new HierarchicalLifetimeManager());
 
             return currentContainer;
         }
