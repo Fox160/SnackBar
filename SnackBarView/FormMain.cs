@@ -1,5 +1,6 @@
 ﻿using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
+using SnackBarService.DataFromUser;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -15,10 +16,14 @@ namespace SnackBarView
 
         private readonly InterfaceMainService service;
 
-        public FormMain(InterfaceMainService service)
+        private readonly InterfaceReportService reportService;
+
+        public FormMain(InterfaceMainService service, InterfaceReportService reportService)
         {
             InitializeComponent();
             this.service = service;
+            this.reportService = reportService;
+
         }
 
         private void LoadData()
@@ -133,6 +138,41 @@ namespace SnackBarView
         private void buttonRef_Click(object sender, EventArgs e)
         {
             LoadData();
+        }
+
+        private void прайсИзделийToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "doc|*.doc|docx|*.docx"
+            };
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    reportService.SaveOutputPrice(new BoundReportModel
+                    {
+                        FileName = sfd.FileName
+                    });
+                    MessageBox.Show("Выполнено", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void загруженностьСкладовToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = Container.Resolve<FormReservesLoad>();
+            form.ShowDialog();
+        }
+
+        private void заказыКлиентовToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = Container.Resolve<FormCustomerBookings>();
+            form.ShowDialog();
         }
     }
 }
