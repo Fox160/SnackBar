@@ -91,9 +91,9 @@
     <Compile Include="Interfaces\InterfaceOutputService.cs" />
     <Compile Include="Interfaces\InterfaceReportService.cs" />
     <Compile Include="Interfaces\InterfaceReserveService.cs" />
-    <Compile Include="Migrations\201803231923314_FirstMigration.cs" />
-    <Compile Include="Migrations\201803231923314_FirstMigration.Designer.cs">
-      <DependentUpon>201803231923314_FirstMigration.cs</DependentUpon>
+    <Compile Include="Migrations\201804171337569_FirstMigration.cs" />
+    <Compile Include="Migrations\201804171337569_FirstMigration.Designer.cs">
+      <DependentUpon>201804171337569_FirstMigration.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -125,8 +125,8 @@
     <None Include="Resources\TIMCYR.TTF" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201803231923314_FirstMigration.resx">
-      <DependentUpon>201803231923314_FirstMigration.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201804171337569_FirstMigration.resx">
+      <DependentUpon>201804171337569_FirstMigration.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
