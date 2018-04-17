@@ -39,6 +39,8 @@ namespace SnackBarView
             currentContainer.RegisterType<InterfaceOutputService, OutputServiceDB>(new HierarchicalLifetimeManager());
             currentContainer.RegisterType<InterfaceReserveService, ReserveServiceDB>(new HierarchicalLifetimeManager());
             currentContainer.RegisterType<InterfaceMainService, MainServiceBD>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceReportService, ReportServiceDB>(new HierarchicalLifetimeManager());
+
 
             return currentContainer;
         }

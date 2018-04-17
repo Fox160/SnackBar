@@ -36,6 +36,19 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="itextsharp, Version=5.5.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\iTextSharp.5.5.13\lib\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\packages\Microsoft.Office.Interop.Excel.15.0.4795.1000\lib\net20\Microsoft.Office.Interop.Excel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\packages\Microsoft.Office.Interop.Word.15.0.4797.1003\lib\net20\Microsoft.Office.Interop.Word.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -54,6 +67,7 @@
     <Compile Include="DataFromUser\BoundBookingModel.cs" />
     <Compile Include="DataFromUser\BoundOutputModel.cs" />
     <Compile Include="DataFromUser\BoundProdElementModel.cs" />
+    <Compile Include="DataFromUser\BoundReportModel.cs" />
     <Compile Include="DataFromUser\BoundReserveModel.cs" />
     <Compile Include="DataFromUser\BoundResElementModel.cs" />
     <Compile Include="DataListSingleton.cs" />
@@ -62,6 +76,7 @@
     <Compile Include="ImplementationsDB\ExecutorServiceDB.cs" />
     <Compile Include="ImplementationsDB\MainServiceDB.cs" />
     <Compile Include="ImplementationsDB\OutputServiceDB.cs" />
+    <Compile Include="ImplementationsDB\ReportServiceDB.cs" />
     <Compile Include="ImplementationsDB\ReserveServiceDB.cs" />
     <Compile Include="ImplementatoinsList\CustomerServiceList.cs" />
     <Compile Include="ImplementatoinsList\ElementServiceList.cs" />
@@ -74,6 +89,7 @@
     <Compile Include="Interfaces\InterfaceExecutorService.cs" />
     <Compile Include="Interfaces\InterfaceMainService.cs" />
     <Compile Include="Interfaces\InterfaceOutputService.cs" />
+    <Compile Include="Interfaces\InterfaceReportService.cs" />
     <Compile Include="Interfaces\InterfaceReserveService.cs" />
     <Compile Include="Migrations\201804171337569_FirstMigration.cs" />
     <Compile Include="Migrations\201804171337569_FirstMigration.Designer.cs">
@@ -81,6 +97,12 @@
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModel\ModelCustomerBookingsView.cs" />
     <Compile Include="ViewModel\ModelCustomerView.cs" />
     <Compile Include="ViewModel\ModelElementView.cs" />
     <Compile Include="ViewModel\ModelExecutorView.cs" />
@@ -88,6 +110,7 @@
     <Compile Include="ViewModel\ModelProdElementView.cs" />
     <Compile Include="ViewModel\ModelOutputView.cs" />
     <Compile Include="ViewModel\ModelReserveElementView.cs" />
+    <Compile Include="ViewModel\ModelReservesLoadView.cs" />
     <Compile Include="ViewModel\ModelReserveView.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -99,10 +122,15 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Resources\TIMCYR.TTF" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201804171337569_FirstMigration.resx">
       <DependentUpon>201804171337569_FirstMigration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
