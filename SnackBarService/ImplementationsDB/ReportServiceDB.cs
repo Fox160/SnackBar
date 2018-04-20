@@ -40,27 +40,27 @@ namespace SnackBarService.ImplementationsDB
 
                 Microsoft.Office.Interop.Word.Document document =
                     winword.Documents.Add(ref missing, ref missing, ref missing, ref missing);
-                
+
                 var paragraph = document.Paragraphs.Add(missing);
                 var range = paragraph.Range;
-                
+
                 range.Text = "Прайс изделий";
-                
+
                 var font = range.Font;
                 font.Size = 16;
                 font.Name = "Times New Roman";
                 font.Bold = 1;
-                
+
                 var paragraphFormat = range.ParagraphFormat;
                 paragraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
                 paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceSingle;
                 paragraphFormat.SpaceAfter = 10;
                 paragraphFormat.SpaceBefore = 0;
-                
+
                 range.InsertParagraphAfter();
 
                 var Outputs = context.Outputs.ToList();
-                
+
                 var paragraphTable = document.Paragraphs.Add(Type.Missing);
                 var rangeTable = paragraphTable.Range;
                 var table = document.Tables.Add(rangeTable, Outputs.Count, 2, ref missing, ref missing);
@@ -79,7 +79,7 @@ namespace SnackBarService.ImplementationsDB
                     table.Cell(i + 1, 1).Range.Text = Outputs[i].OutputName;
                     table.Cell(i + 1, 2).Range.Text = Outputs[i].Price.ToString();
                 }
-                
+
                 table.Borders.InsideLineStyle = WdLineStyle.wdLineStyleInset;
                 table.Borders.OutsideLineStyle = WdLineStyle.wdLineStyleSingle;
 
@@ -99,7 +99,7 @@ namespace SnackBarService.ImplementationsDB
                 paragraphFormat.SpaceBefore = 10;
 
                 range.InsertParagraphAfter();
-                
+
                 object fileFormat = WdSaveFormat.wdFormatXMLDocument;
                 document.SaveAs(model.FileName, ref fileFormat, ref missing,
                     ref missing, ref missing, ref missing, ref missing,
@@ -121,21 +121,24 @@ namespace SnackBarService.ImplementationsDB
         public List<ModelReservesLoadView> GetReservesLoad()
         {
             return context.Reserves
-                            .ToList()
-                            .GroupJoin(
-                                    context.ReserveElements
-                                                .Include(r => r.Element)
-                                                .ToList(),
-                                    Reserve => Reserve,
-                                    ReserveElement => ReserveElement.Reserve,
-                                    (Reserve, ReserveCompList) =>
-            new ModelReservesLoadView
-            {
-                ReserveName = Reserve.ReserveName,
-                TotalCount = ReserveCompList.Sum(r => r.Count),
-                Elements = ReserveCompList.Select(r => new Tuple<string, int>(r.Element.ElementName, r.Count))
-            })
-                            .ToList();
+                .ToList()
+                .GroupJoin(
+                    context.ReserveElements.Include(r => r.Element).ToList(),
+                    Reserve => Reserve,
+                    ReserveElement => ReserveElement.Reserve,
+                    (Reserve, ReserveCompList) => new ModelReservesLoadView
+                    {
+                        ReserveName = Reserve.ReserveName,
+                        TotalCount = ReserveCompList.Sum(r => r.Count),
+                        Elements = ReserveCompList.Select(r => new StocksComponentLoadViewModel
+                        {
+                            ElementName = r.Element.ElementName,
+                            Count = r.Count
+                        }
+                        ).ToList()
+                    }
+                )
+                .ToList();
         }
 
         public void SaveReservesLoad(BoundReportModel model)
@@ -143,7 +146,7 @@ namespace SnackBarService.ImplementationsDB
             var excel = new Microsoft.Office.Interop.Excel.Application();
             try
             {
-                
+
                 if (File.Exists(model.FileName))
                 {
                     excel.Workbooks.Open(model.FileName, Type.Missing, Type.Missing, Type.Missing,
@@ -161,19 +164,19 @@ namespace SnackBarService.ImplementationsDB
                 }
 
                 Sheets excelsheets = excel.Workbooks[1].Worksheets;
-                
+
                 var excelworksheet = (Worksheet)excelsheets.get_Item(1);
-                
+
                 excelworksheet.Cells.Clear();
-                
+
                 excelworksheet.PageSetup.Orientation = XlPageOrientation.xlLandscape;
                 excelworksheet.PageSetup.CenterHorizontally = true;
                 excelworksheet.PageSetup.CenterVertically = true;
-                
+
                 Microsoft.Office.Interop.Excel.Range excelcells = excelworksheet.get_Range("A1", "C1");
-                
+
                 excelcells.Merge(Type.Missing);
-                
+
                 excelcells.Font.Bold = true;
                 excelcells.Value2 = "Загруженность складов";
                 excelcells.RowHeight = 25;
@@ -197,15 +200,15 @@ namespace SnackBarService.ImplementationsDB
                     excelcells = excelworksheet.get_Range("C1", "C1");
                     foreach (var elem in dict)
                     {
-                        
+
                         excelcells = excelcells.get_Offset(2, -2);
                         excelcells.ColumnWidth = 15;
                         excelcells.Value2 = elem.ReserveName;
                         excelcells = excelcells.get_Offset(1, 1);
-                        
+
                         if (elem.Elements.Count() > 0)
                         {
-                            
+
                             var excelBorder =
                                 excelworksheet.get_Range(excelcells,
                                             excelcells.get_Offset(elem.Elements.Count() - 1, 1));
@@ -220,9 +223,9 @@ namespace SnackBarService.ImplementationsDB
 
                             foreach (var listElem in elem.Elements)
                             {
-                                excelcells.Value2 = listElem.Item1;
+                                excelcells.Value2 = listElem.ElementName;
                                 excelcells.ColumnWidth = 10;
-                                excelcells.get_Offset(0, 1).Value2 = listElem.Item2;
+                                excelcells.get_Offset(0, 1).Value2 = listElem.Count;
                                 excelcells = excelcells.get_Offset(1, 0);
                             }
                         }
@@ -234,7 +237,7 @@ namespace SnackBarService.ImplementationsDB
                         excelcells.Font.Bold = true;
                     }
                 }
-                
+
                 excel.Workbooks[1].Save();
             }
             catch (Exception)
@@ -250,33 +253,33 @@ namespace SnackBarService.ImplementationsDB
         public List<ModelCustomerBookingsView> GetCustomerBookings(BoundReportModel model)
         {
             return context.Bookings
-                            .Include(rec => rec.Customer)
-                            .Include(rec => rec.Output)
-                            .Where(rec => rec.DateOfCreate >= model.DateFrom && rec.DateOfCreate <= model.DateTo)
-                            .Select(rec => new ModelCustomerBookingsView
-                            {
-                                CustomerName = rec.Customer.CustomerFullName,
-                                DateOfCreate = SqlFunctions.DateName("dd", rec.DateOfCreate) + " " +
-                                            SqlFunctions.DateName("mm", rec.DateOfCreate) + " " +
-                                            SqlFunctions.DateName("yyyy", rec.DateOfCreate),
-                                OutputName = rec.Output.OutputName,
-                                Count = rec.Count,
-                                Sum = rec.Summa,
-                                Status = rec.Status.ToString()
-                            })
-                            .ToList();
+                    .Include(rec => rec.Customer)
+                    .Include(rec => rec.Output)
+                    .Where(rec => rec.DateOfCreate >= model.DateFrom && rec.DateOfCreate <= model.DateTo)
+                    .Select(rec => new ModelCustomerBookingsView
+                    {
+                        CustomerName = rec.Customer.CustomerFullName,
+                        DateOfCreate = SqlFunctions.DateName("dd", rec.DateOfCreate) + " " +
+                                    SqlFunctions.DateName("mm", rec.DateOfCreate) + " " +
+                                    SqlFunctions.DateName("yyyy", rec.DateOfCreate),
+                        OutputName = rec.Output.OutputName,
+                        Count = rec.Count,
+                        Sum = rec.Summa,
+                        Status = rec.Status.ToString()
+                    })
+                    .ToList();
         }
 
         public void SaveCustomerBookings(BoundReportModel model)
         {
-            
+
             if (!File.Exists("TIMCYR.TTF"))
             {
                 File.WriteAllBytes("TIMCYR.TTF", Properties.Resources.TIMCYR);
             }
-            
+
             FileStream fs = new FileStream(model.FileName, FileMode.OpenOrCreate, FileAccess.Write);
-            
+
             iTextSharp.text.Document doc = new iTextSharp.text.Document();
             doc.SetMargins(0.5f, 0.5f, 0.5f, 0.5f);
             PdfWriter writer = PdfWriter.GetInstance(doc, fs);
@@ -284,7 +287,7 @@ namespace SnackBarService.ImplementationsDB
             doc.Open();
             BaseFont baseFont = BaseFont.CreateFont("TIMCYR.TTF", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
 
-            
+
             var phraseTitle = new Phrase("Заказы клиентов",
                 new iTextSharp.text.Font(baseFont, 16, iTextSharp.text.Font.BOLD));
             iTextSharp.text.Paragraph paragraph = new iTextSharp.text.Paragraph(phraseTitle)
@@ -304,13 +307,13 @@ namespace SnackBarService.ImplementationsDB
             };
             doc.Add(paragraph);
 
-            
+
             PdfPTable table = new PdfPTable(6)
             {
                 TotalWidth = 800F
             };
             table.SetTotalWidth(new float[] { 160, 140, 160, 100, 100, 140 });
-            
+
             PdfPCell cell = new PdfPCell();
             var fontForCellBold = new iTextSharp.text.Font(baseFont, 10, iTextSharp.text.Font.BOLD);
             table.AddCell(new PdfPCell(new Phrase("ФИО клиента", fontForCellBold))
@@ -337,7 +340,7 @@ namespace SnackBarService.ImplementationsDB
             {
                 HorizontalAlignment = Element.ALIGN_CENTER
             });
-            
+
             var list = GetCustomerBookings(model);
             var fontForCells = new iTextSharp.text.Font(baseFont, 10);
             for (int i = 0; i < list.Count; i++)
@@ -357,7 +360,7 @@ namespace SnackBarService.ImplementationsDB
                 cell = new PdfPCell(new Phrase(list[i].Status, fontForCells));
                 table.AddCell(cell);
             }
-            
+
             cell = new PdfPCell(new Phrase("Итого:", fontForCellBold))
             {
                 HorizontalAlignment = Element.ALIGN_RIGHT,
@@ -376,7 +379,7 @@ namespace SnackBarService.ImplementationsDB
                 Border = 0
             };
             table.AddCell(cell);
-            
+
             doc.Add(table);
 
             doc.Close();

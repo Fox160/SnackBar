@@ -3,29 +3,23 @@ using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormOutput : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        public int ID { set { id = value; } }
-
-        private readonly InterfaceOutputService service;
+        public int Id { set { id = value; } }
 
         private int? id;
 
-        private List<ModelProdElementView> productElements;
+        private List<ModelProdElementView> productComponents;
 
-        public FormOutput(InterfaceOutputService service)
+        public FormOutput()
         {
             InitializeComponent();
-            this.service = service;
         }
 
         private void FormProduct_Load(object sender, EventArgs e)
@@ -34,13 +28,18 @@ namespace SnackBarView
             {
                 try
                 {
-                    ModelOutputView view = service.getElement(id.Value);
-                    if (view != null)
+                    var response = APICustomer.GetRequest("api/Output/Get/" + id.Value);
+                    if (response.Result.IsSuccessStatusCode)
                     {
-                        textBoxName.Text = view.OutputName;
-                        textBoxPrice.Text = view.Price.ToString();
-                        productElements = view.OutputElements;
+                        var product = APICustomer.GetElement<ModelOutputView>(response);
+                        textBoxName.Text = product.OutputName;
+                        textBoxPrice.Text = product.Price.ToString();
+                        productComponents = product.OutputElements;
                         LoadData();
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
                     }
                 }
                 catch (Exception ex)
@@ -49,17 +48,19 @@ namespace SnackBarView
                 }
             }
             else
-                productElements = new List<ModelProdElementView>();
+            {
+                productComponents = new List<ModelProdElementView>();
+            }
         }
 
         private void LoadData()
         {
             try
             {
-                if (productElements != null)
+                if (productComponents != null)
                 {
                     dataGridViewProduct.DataSource = null;
-                    dataGridViewProduct.DataSource = productElements;
+                    dataGridViewProduct.DataSource = productComponents;
                     dataGridViewProduct.Columns[0].Visible = false;
                     dataGridViewProduct.Columns[1].Visible = false;
                     dataGridViewProduct.Columns[2].Visible = false;
@@ -74,14 +75,16 @@ namespace SnackBarView
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormOutputElement>();
+            var form = new FormOutputElement();
             if (form.ShowDialog() == DialogResult.OK)
             {
                 if (form.Model != null)
                 {
                     if (id.HasValue)
+                    {
                         form.Model.OutputID = id.Value;
-                    productElements.Add(form.Model);
+                    }
+                    productComponents.Add(form.Model);
                 }
                 LoadData();
             }
@@ -91,11 +94,11 @@ namespace SnackBarView
         {
             if (dataGridViewProduct.SelectedRows.Count == 1)
             {
-                var form = Container.Resolve<FormOutputElement>();
-                form.Model = productElements[dataGridViewProduct.SelectedRows[0].Cells[0].RowIndex];
+                var form = new FormOutputElement();
+                form.Model = productComponents[dataGridViewProduct.SelectedRows[0].Cells[0].RowIndex];
                 if (form.ShowDialog() == DialogResult.OK)
                 {
-                    productElements[dataGridViewProduct.SelectedRows[0].Cells[0].RowIndex] = form.Model;
+                    productComponents[dataGridViewProduct.SelectedRows[0].Cells[0].RowIndex] = form.Model;
                     LoadData();
                 }
             }
@@ -105,11 +108,11 @@ namespace SnackBarView
         {
             if (dataGridViewProduct.SelectedRows.Count == 1)
             {
-                if (MessageBox.Show("Удалить запись?", "Внимание", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show("Удалить запись", "Вопрос", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     try
                     {
-                        productElements.RemoveAt(dataGridViewProduct.SelectedRows[0].Cells[0].RowIndex);
+                        productComponents.RemoveAt(dataGridViewProduct.SelectedRows[0].Cells[0].RowIndex);
                     }
                     catch (Exception ex)
                     {
@@ -137,7 +140,7 @@ namespace SnackBarView
                 MessageBox.Show("Заполните цену", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            if (productElements == null || productElements.Count == 0)
+            if (productComponents == null || productComponents.Count == 0)
             {
                 MessageBox.Show("Заполните компоненты", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -145,19 +148,20 @@ namespace SnackBarView
             try
             {
                 List<BoundProdElementModel> productComponentBM = new List<BoundProdElementModel>();
-                for (int i = 0; i < productElements.Count; ++i)
+                for (int i = 0; i < productComponents.Count; ++i)
                 {
                     productComponentBM.Add(new BoundProdElementModel
                     {
-                        ID = productElements[i].ID,
-                        OutputID = productElements[i].OutputID,
-                        ElementID = productElements[i].ElementID,
-                        Count = productElements[i].Count
+                        ID = productComponents[i].ID,
+                        OutputID = productComponents[i].OutputID,
+                        ElementID = productComponents[i].ElementID,
+                        Count = productComponents[i].Count
                     });
                 }
+                Task<HttpResponseMessage> response;
                 if (id.HasValue)
                 {
-                    service.updateElement(new BoundOutputModel
+                    response = APICustomer.PostRequest("api/Output/UpdElement", new BoundOutputModel
                     {
                         ID = id.Value,
                         OutputName = textBoxName.Text,
@@ -167,16 +171,23 @@ namespace SnackBarView
                 }
                 else
                 {
-                    service.addElement(new BoundOutputModel
+                    response = APICustomer.PostRequest("api/Output/AddElement", new BoundOutputModel
                     {
                         OutputName = textBoxName.Text,
                         Price = Convert.ToInt32(textBoxPrice.Text),
                         OutputElements = productComponentBM
                     });
                 }
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                DialogResult = DialogResult.OK;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

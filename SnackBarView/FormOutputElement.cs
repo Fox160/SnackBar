@@ -3,39 +3,35 @@ using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormOutputElement : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
         public ModelProdElementView Model { set { model = value; } get { return model; } }
-
-        private readonly InterfaceComponentService service;
 
         private ModelProdElementView model;
 
-        public FormOutputElement(InterfaceComponentService service)
+        public FormOutputElement()
         {
             InitializeComponent();
-            this.service = service;
         }
 
         private void FormProductComponent_Load(object sender, EventArgs e)
         {
             try
             {
-                List<ModelElementView> list = service.getList();
-                if (list != null)
+                var response = APICustomer.GetRequest("api/Element/GetList");
+                if (response.Result.IsSuccessStatusCode)
                 {
                     comboBoxComponent.DisplayMember = "ElementName";
-                    comboBoxComponent.ValueMember = "Id";
-                    comboBoxComponent.DataSource = list;
+                    comboBoxComponent.ValueMember = "ID";
+                    comboBoxComponent.DataSource = APICustomer.GetElement<List<ModelElementView>>(response);
                     comboBoxComponent.SelectedItem = null;
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
                 }
             }
             catch (Exception ex)
@@ -77,7 +73,7 @@ namespace SnackBarView
                 {
                     model.Count = Convert.ToInt32(textBoxCount.Text);
                 }
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DialogResult = DialogResult.OK;
                 Close();
             }

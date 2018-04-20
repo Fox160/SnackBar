@@ -10,29 +10,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormTakeBookingInWork : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        public int ID { set { id = value; } }
-
-        private readonly InterfaceExecutorService serviceExecutor;
-
-        private readonly InterfaceMainService serviceMain;
+        public int Id { set { id = value; } }
 
         private int? id;
 
-        public FormTakeBookingInWork(InterfaceExecutorService serviceI, InterfaceMainService serviceM)
+        public FormTakeBookingInWork()
         {
             InitializeComponent();
-            this.serviceExecutor = serviceI;
-            this.serviceMain = serviceM;
         }
 
         private void FormTakeOrderInWork_Load(object sender, EventArgs e)
@@ -44,13 +33,21 @@ namespace SnackBarView
                     MessageBox.Show("Не указан заказ", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Close();
                 }
-                List<ModelExecutorView> listExecutor = serviceExecutor.getList();
-                if (listExecutor != null)
+                var response = APICustomer.GetRequest("api/Executor/GetList");
+                if (response.Result.IsSuccessStatusCode)
                 {
-                    comboBoxExecutor.DisplayMember = "ExecutorFullName";
-                    comboBoxExecutor.ValueMember = "Id";
-                    comboBoxExecutor.DataSource = listExecutor;
-                    comboBoxExecutor.SelectedItem = null;
+                    List<ModelExecutorView> list = APICustomer.GetElement<List<ModelExecutorView>>(response);
+                    if (list != null)
+                    {
+                        comboBoxExecutor.DisplayMember = "ExecutorFullName";
+                        comboBoxExecutor.ValueMember = "ID";
+                        comboBoxExecutor.DataSource = list;
+                        comboBoxExecutor.SelectedItem = null;
+                    }
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
                 }
             }
             catch (Exception ex)
@@ -68,14 +65,21 @@ namespace SnackBarView
             }
             try
             {
-                serviceMain.takeOrderInWork(new BoundBookingModel
+                var response = APICustomer.PostRequest("api/Main/TakeBookingInWork", new BoundBookingModel
                 {
                     ID = id.Value,
                     ExecutorID = Convert.ToInt32(comboBoxExecutor.SelectedValue)
                 });
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                DialogResult = DialogResult.OK;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

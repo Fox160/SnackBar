@@ -2,27 +2,21 @@
 using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormReserve : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        public int ID { set { id = value; } }
-
-        private readonly InterfaceReserveService service;
+        public int Id { set { id = value; } }
 
         private int? id;
 
-        public FormReserve(InterfaceReserveService service)
+        public FormReserve()
         {
             InitializeComponent();
-            this.service = service;
         }
 
         private void FormStock_Load(object sender, EventArgs e)
@@ -31,15 +25,20 @@ namespace SnackBarView
             {
                 try
                 {
-                    ModelReserveView view = service.getElement(id.Value);
-                    if (view != null)
+                    var response = APICustomer.GetRequest("api/Reserve/Get/" + id.Value);
+                    if (response.Result.IsSuccessStatusCode)
                     {
-                        textBoxName.Text = view.ReserveName;
-                        dataGridViewReserve.DataSource = view.ReserveElements;
+                        var stock = APICustomer.GetElement<ModelReserveView>(response);
+                        textBoxName.Text = stock.ReserveName;
+                        dataGridViewReserve.DataSource = stock.ReserveElements;
                         dataGridViewReserve.Columns[0].Visible = false;
                         dataGridViewReserve.Columns[1].Visible = false;
                         dataGridViewReserve.Columns[2].Visible = false;
                         dataGridViewReserve.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
                     }
                 }
                 catch (Exception ex)
@@ -58,9 +57,10 @@ namespace SnackBarView
             }
             try
             {
+                Task<HttpResponseMessage> response;
                 if (id.HasValue)
                 {
-                    service.updateElement(new BoundReserveModel
+                    response = APICustomer.PostRequest("api/Reserve/UpdElement", new BoundReserveModel
                     {
                         ID = id.Value,
                         ReserveName = textBoxName.Text
@@ -68,14 +68,21 @@ namespace SnackBarView
                 }
                 else
                 {
-                    service.addElement(new BoundReserveModel
+                    response = APICustomer.PostRequest("api/Reserve/AddElement", new BoundReserveModel
                     {
                         ReserveName = textBoxName.Text
                     });
                 }
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                DialogResult = DialogResult.OK;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

@@ -1,24 +1,17 @@
 ﻿using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
+using SnackBarService.DataFromUser;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormElements : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        private readonly InterfaceComponentService service;
-
-        public FormElements(InterfaceComponentService service)
+        public FormElements()
         {
             InitializeComponent();
-            this.service = service;
         }
 
         private void FormComponents_Load(object sender, EventArgs e)
@@ -30,12 +23,20 @@ namespace SnackBarView
         {
             try
             {
-                List<ModelElementView> list = service.getList();
-                if (list != null)
+                var response = APICustomer.GetRequest("api/Element/GetList");
+                if (response.Result.IsSuccessStatusCode)
                 {
-                    dataGridViewElements.DataSource = list;
-                    dataGridViewElements.Columns[0].Visible = false;
-                    dataGridViewElements.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    List<ModelElementView> list = APICustomer.GetElement<List<ModelElementView>>(response);
+                    if (list != null)
+                    {
+                        dataGridViewElements.DataSource = list;
+                        dataGridViewElements.Columns[0].Visible = false;
+                        dataGridViewElements.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    }
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
                 }
             }
             catch (Exception ex)
@@ -46,19 +47,23 @@ namespace SnackBarView
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormElement>();
+            var form = new FormElement();
             if (form.ShowDialog() == DialogResult.OK)
+            {
                 LoadData();
+            }
         }
 
         private void buttonUpd_Click(object sender, EventArgs e)
         {
             if (dataGridViewElements.SelectedRows.Count == 1)
             {
-                var form = Container.Resolve<FormElement>();
-                form.ID = Convert.ToInt32(dataGridViewElements.SelectedRows[0].Cells[0].Value);
+                var form = new FormElement();
+                form.Id = Convert.ToInt32(dataGridViewElements.SelectedRows[0].Cells[0].Value);
                 if (form.ShowDialog() == DialogResult.OK)
+                {
                     LoadData();
+                }
             }
         }
 
@@ -66,12 +71,16 @@ namespace SnackBarView
         {
             if (dataGridViewElements.SelectedRows.Count == 1)
             {
-                if (MessageBox.Show("Удалить запись?", "Внимание", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show("Удалить запись", "Вопрос", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     int id = Convert.ToInt32(dataGridViewElements.SelectedRows[0].Cells[0].Value);
                     try
                     {
-                        service.deleteElement(id);
+                        var response = APICustomer.PostRequest("api/Element/DelElement", new BoundCustomerModel { ID = id });
+                        if (!response.Result.IsSuccessStatusCode)
+                        {
+                            throw new Exception(APICustomer.GetError(response));
+                        }
                     }
                     catch (Exception ex)
                     {
