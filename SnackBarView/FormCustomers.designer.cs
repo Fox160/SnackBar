@@ -103,7 +103,7 @@
             this.Name = "FormClients";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Список клиентов";
-            this.Load += new System.EventHandler(this.FormClients_Load);
+            this.Load += new System.EventHandler(this.FormCustomers_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewClients)).EndInit();
             this.ResumeLayout(false);
 
