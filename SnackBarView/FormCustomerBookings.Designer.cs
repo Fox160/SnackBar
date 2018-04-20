@@ -112,7 +112,6 @@
             this.Controls.Add(this.reportViewer);
             this.Name = "FormCustomerBookings";
             this.Text = "Заказы клиентов";
-            this.Load += new System.EventHandler(this.FormCustomerBookings_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
