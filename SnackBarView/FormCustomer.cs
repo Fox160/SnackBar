@@ -2,27 +2,21 @@
 using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormCustomer : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        public int ID { set { id = value; } }
-
-        private readonly InterfaceCustomerService service;
+        public int Id { set { id = value; } }
 
         private int? id;
 
-        public FormCustomer(InterfaceCustomerService service)
+        public FormCustomer()
         {
             InitializeComponent();
-            this.service = service;
         }
 
         private void FormClient_Load(object sender, EventArgs e)
@@ -31,9 +25,16 @@ namespace SnackBarView
             {
                 try
                 {
-                    ModelCustomerView view = service.getElement(id.Value);
-                    if (view != null)
-                        textBoxFullName.Text = view.CustomerFullName;
+                    var response = APICustomer.GetRequest("api/Customer/Get/" + id.Value);
+                    if (response.Result.IsSuccessStatusCode)
+                    {
+                        var client = APICustomer.GetElement<ModelCustomerView>(response);
+                        textBoxFullName.Text = client.CustomerFullName;
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -51,9 +52,10 @@ namespace SnackBarView
             }
             try
             {
+                Task<HttpResponseMessage> response;
                 if (id.HasValue)
                 {
-                    service.updateElement(new BoundCustomerModel
+                    response = APICustomer.PostRequest("api/Customer/UpdElement", new BoundCustomerModel
                     {
                         ID = id.Value,
                         CustomerFullName = textBoxFullName.Text
@@ -61,14 +63,21 @@ namespace SnackBarView
                 }
                 else
                 {
-                    service.addElement(new BoundCustomerModel
+                    response = APICustomer.PostRequest("api/Customer/AddElement", new BoundCustomerModel
                     {
                         CustomerFullName = textBoxFullName.Text
                     });
                 }
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                DialogResult = DialogResult.OK;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

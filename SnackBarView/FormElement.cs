@@ -2,27 +2,21 @@
 using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormElement : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        public int ID { set { id = value; } }
-
-        private readonly InterfaceComponentService service;
+        public int Id { set { id = value; } }
 
         private int? id;
 
-        public FormElement(InterfaceComponentService service)
+        public FormElement()
         {
             InitializeComponent();
-            this.service = service;
         }
 
         private void FormComponent_Load(object sender, EventArgs e)
@@ -31,10 +25,15 @@ namespace SnackBarView
             {
                 try
                 {
-                    ModelElementView view = service.getElement(id.Value);
-                    if (view != null)
+                    var response = APICustomer.GetRequest("api/Element/Get/" + id.Value);
+                    if (response.Result.IsSuccessStatusCode)
                     {
-                        textBoxName.Text = view.ElementName;
+                        var component = APICustomer.GetElement<ModelElementView>(response);
+                        textBoxName.Text = component.ElementName;
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
                     }
                 }
                 catch (Exception ex)
@@ -53,9 +52,10 @@ namespace SnackBarView
             }
             try
             {
+                Task<HttpResponseMessage> response;
                 if (id.HasValue)
                 {
-                    service.updateElement(new BoundElementModel
+                    response = APICustomer.PostRequest("api/Element/UpdElement", new BoundElementModel
                     {
                         ID = id.Value,
                         ElementName = textBoxName.Text
@@ -63,14 +63,21 @@ namespace SnackBarView
                 }
                 else
                 {
-                    service.addElement(new BoundElementModel
+                    response = APICustomer.PostRequest("api/Element/AddElement", new BoundElementModel
                     {
                         ElementName = textBoxName.Text
                     });
                 }
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                DialogResult = DialogResult.OK;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

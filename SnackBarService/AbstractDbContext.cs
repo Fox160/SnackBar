@@ -12,7 +12,7 @@ namespace SnackBarService
     [Table("AbstractDatabase")]
     public class AbstractDbContext : DbContext
     {
-        public AbstractDbContext()
+        public AbstractDbContext() : base("AbstractDbContext")
         {
             Configuration.ProxyCreationEnabled = false;
             Configuration.LazyLoadingEnabled = false;

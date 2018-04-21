@@ -4,49 +4,51 @@ using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormCreateBooking : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        private readonly InterfaceCustomerService serviceClient;
-
-        private readonly InterfaceOutputService serviceProduct;
-
-        private readonly InterfaceMainService serviceMain;
-
-        public FormCreateBooking(InterfaceCustomerService serviceC, InterfaceOutputService serviceP, InterfaceMainService serviceM)
+        public FormCreateBooking()
         {
             InitializeComponent();
-            this.serviceClient = serviceC;
-            this.serviceProduct = serviceP;
-            this.serviceMain = serviceM;
         }
 
         private void FormCreateOrder_Load(object sender, EventArgs e)
         {
             try
             {
-                List<ModelCustomerView> listClient = serviceClient.getList();
-                if (listClient != null)
+                var responseC = APICustomer.GetRequest("api/Customer/GetList");
+                if (responseC.Result.IsSuccessStatusCode)
                 {
-                    comboBoxClient.DisplayMember = "CustomerFullName";
-                    comboBoxClient.ValueMember = "Id";
-                    comboBoxClient.DataSource = listClient;
-                    comboBoxClient.SelectedItem = null;
+                    List<ModelCustomerView> list = APICustomer.GetElement<List<ModelCustomerView>>(responseC);
+                    if (list != null)
+                    {
+                        comboBoxClient.DisplayMember = "CustomerFullName";
+                        comboBoxClient.ValueMember = "ID";
+                        comboBoxClient.DataSource = list;
+                        comboBoxClient.SelectedItem = null;
+                    }
                 }
-                List<ModelOutputView> listProduct = serviceProduct.getList();
-                if (listProduct != null)
+                else
                 {
-                    comboBoxProduct.DisplayMember = "OutputName";
-                    comboBoxProduct.ValueMember = "Id";
-                    comboBoxProduct.DataSource = listProduct;
-                    comboBoxProduct.SelectedItem = null;
+                    throw new Exception(APICustomer.GetError(responseC));
+                }
+                var responseP = APICustomer.GetRequest("api/Output/GetList");
+                if (responseP.Result.IsSuccessStatusCode)
+                {
+                    List<ModelOutputView> list = APICustomer.GetElement<List<ModelOutputView>>(responseP);
+                    if (list != null)
+                    {
+                        comboBoxProduct.DisplayMember = "OutputName";
+                        comboBoxProduct.ValueMember = "ID";
+                        comboBoxProduct.DataSource = list;
+                        comboBoxProduct.SelectedItem = null;
+                    }
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(responseP));
                 }
             }
             catch (Exception ex)
@@ -62,9 +64,17 @@ namespace SnackBarView
                 try
                 {
                     int id = Convert.ToInt32(comboBoxProduct.SelectedValue);
-                    ModelOutputView product = serviceProduct.getElement(id);
-                    int count = Convert.ToInt32(textBoxCount.Text);
-                    textBoxSum.Text = (count * (int)product.Price).ToString();
+                    var responseP = APICustomer.GetRequest("api/Output/Get/" + id);
+                    if (responseP.Result.IsSuccessStatusCode)
+                    {
+                        ModelOutputView product = APICustomer.GetElement<ModelOutputView>(responseP);
+                        int count = Convert.ToInt32(textBoxCount.Text);
+                        textBoxSum.Text = (count * (int)product.Price).ToString();
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(responseP));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -102,16 +112,23 @@ namespace SnackBarView
             }
             try
             {
-                serviceMain.createOrder(new BoundBookingModel
+                var response = APICustomer.PostRequest("api/Main/CreateBooking", new ModelBookingView
                 {
                     CustomerID = Convert.ToInt32(comboBoxClient.SelectedValue),
                     OutputID = Convert.ToInt32(comboBoxProduct.SelectedValue),
                     Count = Convert.ToInt32(textBoxCount.Text),
                     Summa = Convert.ToInt32(textBoxSum.Text)
                 });
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                DialogResult = DialogResult.OK;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

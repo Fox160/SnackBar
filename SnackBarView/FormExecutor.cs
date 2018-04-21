@@ -2,27 +2,21 @@
 using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormExecutor : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        public int ID { set { id = value; } }
-
-        private readonly InterfaceExecutorService service;
+        public int Id { set { id = value; } }
 
         private int? id;
 
-        public FormExecutor(InterfaceExecutorService service)
+        public FormExecutor()
         {
             InitializeComponent();
-            this.service = service;
         }
 
         private void FormImplementer_Load(object sender, EventArgs e)
@@ -31,9 +25,16 @@ namespace SnackBarView
             {
                 try
                 {
-                    ModelExecutorView view = service.getElement(id.Value);
-                    if (view != null)
-                        textBoxFullName.Text = view.ExecutorFullName;
+                    var response = APICustomer.GetRequest("api/Executor/Get/" + id.Value);
+                    if (response.Result.IsSuccessStatusCode)
+                    {
+                        var implementer = APICustomer.GetElement<ModelExecutorView>(response);
+                        textBoxFullName.Text = implementer.ExecutorFullName;
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -51,9 +52,10 @@ namespace SnackBarView
             }
             try
             {
+                Task<HttpResponseMessage> response;
                 if (id.HasValue)
                 {
-                    service.updateElement(new BoundExecutorModel
+                    response = APICustomer.PostRequest("api/Executor/UpdElement", new BoundExecutorModel
                     {
                         ID = id.Value,
                         ExecutorFullName = textBoxFullName.Text
@@ -61,14 +63,21 @@ namespace SnackBarView
                 }
                 else
                 {
-                    service.addElement(new BoundExecutorModel
+                    response = APICustomer.PostRequest("api/Executor/AddElement", new BoundExecutorModel
                     {
                         ExecutorFullName = textBoxFullName.Text
                     });
                 }
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                DialogResult = DialogResult.OK;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

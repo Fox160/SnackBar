@@ -4,41 +4,37 @@ using SnackBarService.DataFromUser;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormMain : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        private readonly InterfaceMainService service;
-
-        private readonly InterfaceReportService reportService;
-
-        public FormMain(InterfaceMainService service, InterfaceReportService reportService)
+        public FormMain()
         {
             InitializeComponent();
-            this.service = service;
-            this.reportService = reportService;
-
         }
 
         private void LoadData()
         {
             try
             {
-                List<ModelBookingView> list = service.getList();
-                if (list != null)
+                var response = APICustomer.GetRequest("api/Main/GetList");
+                if (response.Result.IsSuccessStatusCode)
                 {
-                    dataGridViewMain.DataSource = list;
-                    dataGridViewMain.Columns[0].Visible = false;
-                    dataGridViewMain.Columns[1].Visible = false;
-                    dataGridViewMain.Columns[3].Visible = false;
-                    dataGridViewMain.Columns[5].Visible = false;
-                    dataGridViewMain.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    List<ModelBookingView> list = APICustomer.GetElement<List<ModelBookingView>>(response);
+                    if (list != null)
+                    {
+                        dataGridViewMain.DataSource = list;
+                        dataGridViewMain.Columns[0].Visible = false;
+                        dataGridViewMain.Columns[1].Visible = false;
+                        dataGridViewMain.Columns[3].Visible = false;
+                        dataGridViewMain.Columns[5].Visible = false;
+                        dataGridViewMain.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    }
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
                 }
             }
             catch (Exception ex)
@@ -49,43 +45,43 @@ namespace SnackBarView
 
         private void клиентыToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormCustomers>();
+            var form = new FormCustomers();
             form.ShowDialog();
         }
 
         private void компонентыToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormElements>();
+            var form = new FormElements();
             form.ShowDialog();
         }
 
         private void изделияToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormOutputs>();
+            var form = new FormOutputs();
             form.ShowDialog();
         }
 
         private void складыToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormReserve>();
+            var form = new FormReserves();
             form.ShowDialog();
         }
 
         private void сотрудникиToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormExecutors>();
+            var form = new FormExecutors();
             form.ShowDialog();
         }
 
         private void пополнитьСкладToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormPutOnReserve>();
+            var form = new FormPutOnReserve();
             form.ShowDialog();
         }
 
         private void buttonCreateOrder_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormCreateBooking>();
+            var form = new FormCreateBooking();
             form.ShowDialog();
             LoadData();
         }
@@ -94,8 +90,10 @@ namespace SnackBarView
         {
             if (dataGridViewMain.SelectedRows.Count == 1)
             {
-                var form = Container.Resolve<FormTakeBookingInWork>();
-                form.ID = Convert.ToInt32(dataGridViewMain.SelectedRows[0].Cells[0].Value);
+                var form = new FormTakeBookingInWork
+                {
+                    Id = Convert.ToInt32(dataGridViewMain.SelectedRows[0].Cells[0].Value)
+                };
                 form.ShowDialog();
                 LoadData();
             }
@@ -108,8 +106,18 @@ namespace SnackBarView
                 int id = Convert.ToInt32(dataGridViewMain.SelectedRows[0].Cells[0].Value);
                 try
                 {
-                    service.finishOrder(id);
-                    LoadData();
+                    var response = APICustomer.PostRequest("api/Main/FinishBooking", new BoundBookingModel
+                    {
+                        ID = id
+                    });
+                    if (response.Result.IsSuccessStatusCode)
+                    {
+                        LoadData();
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -125,8 +133,18 @@ namespace SnackBarView
                 int id = Convert.ToInt32(dataGridViewMain.SelectedRows[0].Cells[0].Value);
                 try
                 {
-                    service.payOrder(id);
-                    LoadData();
+                    var response = APICustomer.PostRequest("api/Main/PayBooking", new BoundBookingModel
+                    {
+                        ID = id
+                    });
+                    if (response.Result.IsSuccessStatusCode)
+                    {
+                        LoadData();
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -150,11 +168,18 @@ namespace SnackBarView
             {
                 try
                 {
-                    reportService.SaveOutputPrice(new BoundReportModel
+                    var response = APICustomer.PostRequest("api/Report/SaveOutputPrice", new BoundReportModel
                     {
                         FileName = sfd.FileName
                     });
-                    MessageBox.Show("Выполнено", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (response.Result.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Выполнено", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -165,13 +190,13 @@ namespace SnackBarView
 
         private void загруженностьСкладовToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormReservesLoad>();
+            var form = new FormReservesLoad();
             form.ShowDialog();
         }
 
         private void заказыКлиентовToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormCustomerBookings>();
+            var form = new FormCustomerBookings();
             form.ShowDialog();
         }
     }

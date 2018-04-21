@@ -4,49 +4,51 @@ using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Unity;
-using Unity.Attributes;
 
 namespace SnackBarView
 {
     public partial class FormPutOnReserve : Form
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        private readonly InterfaceReserveService serviceReserve;
-
-        private readonly InterfaceComponentService serviceComponent;
-
-        private readonly InterfaceMainService serviceMain;
-
-        public FormPutOnReserve(InterfaceReserveService serviceS, InterfaceComponentService serviceC, InterfaceMainService serviceM)
+        public FormPutOnReserve()
         {
             InitializeComponent();
-            this.serviceReserve = serviceS;
-            this.serviceComponent = serviceC;
-            this.serviceMain = serviceM;
         }
 
         private void FormPutOnStock_Load(object sender, EventArgs e)
         {
             try
             {
-                List<ModelElementView> listElement = serviceComponent.getList();
-                if (listElement != null)
+                var responseC = APICustomer.GetRequest("api/Element/GetList");
+                if (responseC.Result.IsSuccessStatusCode)
                 {
-                    comboBoxComponent.DisplayMember = "ElementName";
-                    comboBoxComponent.ValueMember = "Id";
-                    comboBoxComponent.DataSource = listElement;
-                    comboBoxComponent.SelectedItem = null;
+                    List<ModelElementView> list = APICustomer.GetElement<List<ModelElementView>>(responseC);
+                    if (list != null)
+                    {
+                        comboBoxComponent.DisplayMember = "ElementName";
+                        comboBoxComponent.ValueMember = "Id";
+                        comboBoxComponent.DataSource = list;
+                        comboBoxComponent.SelectedItem = null;
+                    }
                 }
-                List<ModelReserveView> listReserve = serviceReserve.getList();
-                if (listReserve != null)
+                else
                 {
-                    comboBoxStock.DisplayMember = "ReserveName";
-                    comboBoxStock.ValueMember = "Id";
-                    comboBoxStock.DataSource = listReserve;
-                    comboBoxStock.SelectedItem = null;
+                    throw new Exception(APICustomer.GetError(responseC));
+                }
+                var responseS = APICustomer.GetRequest("api/Reserve/GetList");
+                if (responseS.Result.IsSuccessStatusCode)
+                {
+                    List<ModelReserveView> list = APICustomer.GetElement<List<ModelReserveView>>(responseS);
+                    if (list != null)
+                    {
+                        comboBoxStock.DisplayMember = "ReserveName";
+                        comboBoxStock.ValueMember = "ID";
+                        comboBoxStock.DataSource = list;
+                        comboBoxStock.SelectedItem = null;
+                    }
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(responseC));
                 }
             }
             catch (Exception ex)
@@ -74,15 +76,22 @@ namespace SnackBarView
             }
             try
             {
-                serviceMain.putComponentOnReserve(new BoundResElementModel
+                var response = APICustomer.PostRequest("api/Main/PutElementOnReserve", new BoundResElementModel
                 {
                     ElementID = Convert.ToInt32(comboBoxComponent.SelectedValue),
                     ReserveID = Convert.ToInt32(comboBoxStock.SelectedValue),
                     Count = Convert.ToInt32(textBoxCount.Text)
                 });
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                DialogResult = DialogResult.OK;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {
