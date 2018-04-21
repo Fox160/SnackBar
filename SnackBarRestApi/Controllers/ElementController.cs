@@ -49,13 +49,13 @@ namespace SnackBarRestApi.Controllers
         [HttpPost]
         public void UpdElement(BoundElementModel model)
         {
-            _service.addElement(model);
+            _service.updateElement(model);
         }
 
         [HttpPost]
         public void DelElement(BoundElementModel model)
         {
-            _service.getElement(model.ID);
+            _service.deleteElement(model.ID);
         }
     }
 }
