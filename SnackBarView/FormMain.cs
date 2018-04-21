@@ -4,6 +4,7 @@ using SnackBarService.DataFromUser;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace SnackBarView
 {
@@ -18,27 +19,23 @@ namespace SnackBarView
         {
             try
             {
-                var response = APICustomer.GetRequest("api/Main/GetList");
-                if (response.Result.IsSuccessStatusCode)
+                List<ModelBookingView> list = Task.Run(() => APICustomer.GetRequestData<List<ModelBookingView>>("api/Main/GetList")).Result;
+                if (list != null)
                 {
-                    List<ModelBookingView> list = APICustomer.GetElement<List<ModelBookingView>>(response);
-                    if (list != null)
-                    {
-                        dataGridViewMain.DataSource = list;
-                        dataGridViewMain.Columns[0].Visible = false;
-                        dataGridViewMain.Columns[1].Visible = false;
-                        dataGridViewMain.Columns[3].Visible = false;
-                        dataGridViewMain.Columns[5].Visible = false;
-                        dataGridViewMain.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                    }
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
+                    dataGridViewMain.DataSource = list;
+                    dataGridViewMain.Columns[0].Visible = false;
+                    dataGridViewMain.Columns[1].Visible = false;
+                    dataGridViewMain.Columns[3].Visible = false;
+                    dataGridViewMain.Columns[5].Visible = false;
+                    dataGridViewMain.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
                 }
             }
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -83,7 +80,6 @@ namespace SnackBarView
         {
             var form = new FormCreateBooking();
             form.ShowDialog();
-            LoadData();
         }
 
         private void buttonTakeOrderInWork_Click(object sender, EventArgs e)
@@ -95,7 +91,6 @@ namespace SnackBarView
                     Id = Convert.ToInt32(dataGridViewMain.SelectedRows[0].Cells[0].Value)
                 };
                 form.ShowDialog();
-                LoadData();
             }
         }
 
@@ -104,25 +99,24 @@ namespace SnackBarView
             if (dataGridViewMain.SelectedRows.Count == 1)
             {
                 int id = Convert.ToInt32(dataGridViewMain.SelectedRows[0].Cells[0].Value);
-                try
+
+                Task task = Task.Run(() => APICustomer.PostRequestData("api/Main/FinishBooking", new BoundBookingModel
                 {
-                    var response = APICustomer.PostRequest("api/Main/FinishBooking", new BoundBookingModel
-                    {
-                        ID = id
-                    });
-                    if (response.Result.IsSuccessStatusCode)
-                    {
-                        LoadData();
-                    }
-                    else
-                    {
-                        throw new Exception(APICustomer.GetError(response));
-                    }
-                }
-                catch (Exception ex)
+                    ID = id
+                }));
+
+                task.ContinueWith((prevTask) => MessageBox.Show("Статус заказа изменен. Обновите список", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information),
+                TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                task.ContinueWith((prevTask) =>
                 {
+                    var ex = (Exception)prevTask.Exception;
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                    }
                     MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                }, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 
@@ -131,25 +125,24 @@ namespace SnackBarView
             if (dataGridViewMain.SelectedRows.Count == 1)
             {
                 int id = Convert.ToInt32(dataGridViewMain.SelectedRows[0].Cells[0].Value);
-                try
+
+                Task task = Task.Run(() => APICustomer.PostRequestData("api/Main/PayBooking", new BoundBookingModel
                 {
-                    var response = APICustomer.PostRequest("api/Main/PayBooking", new BoundBookingModel
-                    {
-                        ID = id
-                    });
-                    if (response.Result.IsSuccessStatusCode)
-                    {
-                        LoadData();
-                    }
-                    else
-                    {
-                        throw new Exception(APICustomer.GetError(response));
-                    }
-                }
-                catch (Exception ex)
+                    ID = id
+                }));
+
+                task.ContinueWith((prevTask) => MessageBox.Show("Статус заказа изменен. Обновите список", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information),
+                TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                task.ContinueWith((prevTask) =>
                 {
+                    var ex = (Exception)prevTask.Exception;
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                    }
                     MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                }, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 
@@ -166,25 +159,24 @@ namespace SnackBarView
             };
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                try
+                string fileName = sfd.FileName;
+                Task task = Task.Run(() => APICustomer.PostRequestData("api/Report/SaveOutputPrice", new BoundReportModel
                 {
-                    var response = APICustomer.PostRequest("api/Report/SaveOutputPrice", new BoundReportModel
-                    {
-                        FileName = sfd.FileName
-                    });
-                    if (response.Result.IsSuccessStatusCode)
-                    {
-                        MessageBox.Show("Выполнено", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        throw new Exception(APICustomer.GetError(response));
-                    }
-                }
-                catch (Exception ex)
+                    FileName = fileName
+                }));
+
+                task.ContinueWith((prevTask) => MessageBox.Show("Выполнено", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information),
+                TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                task.ContinueWith((prevTask) =>
                 {
+                    var ex = (Exception)prevTask.Exception;
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                    }
                     MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                }, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 
