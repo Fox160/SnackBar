@@ -4,6 +4,7 @@ using SnackBarService.DataFromUser;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace SnackBarView
 {
@@ -23,24 +24,20 @@ namespace SnackBarView
         {
             try
             {
-                var response = APICustomer.GetRequest("api/Output/GetList");
-                if (response.Result.IsSuccessStatusCode)
+                List<ModelOutputView> list = Task.Run(() => APICustomer.GetRequestData<List<ModelOutputView>>("api/Output/GetList")).Result;
+                if (list != null)
                 {
-                    List<ModelOutputView> list = APICustomer.GetElement<List<ModelOutputView>>(response);
-                    if (list != null)
-                    {
-                        dataGridViewProducts.DataSource = list;
-                        dataGridViewProducts.Columns[0].Visible = false;
-                        dataGridViewProducts.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                    }
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
+                    dataGridViewProducts.DataSource = list;
+                    dataGridViewProducts.Columns[0].Visible = false;
+                    dataGridViewProducts.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
                 }
             }
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -48,22 +45,18 @@ namespace SnackBarView
         private void buttonAdd_Click(object sender, EventArgs e)
         {
             var form = new FormOutput();
-            if (form.ShowDialog() == DialogResult.OK)
-            {
-                LoadData();
-            }
+            form.ShowDialog();
         }
 
         private void buttonUpd_Click(object sender, EventArgs e)
         {
             if (dataGridViewProducts.SelectedRows.Count == 1)
             {
-                var form = new FormOutput();
-                form.Id = Convert.ToInt32(dataGridViewProducts.SelectedRows[0].Cells[0].Value);
-                if (form.ShowDialog() == DialogResult.OK)
+                var form = new FormOutput
                 {
-                    LoadData();
-                }
+                    Id = Convert.ToInt32(dataGridViewProducts.SelectedRows[0].Cells[0].Value)
+                };
+                form.ShowDialog();
             }
         }
 
@@ -74,19 +67,21 @@ namespace SnackBarView
                 if (MessageBox.Show("Удалить запись", "Вопрос", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     int id = Convert.ToInt32(dataGridViewProducts.SelectedRows[0].Cells[0].Value);
-                    try
+
+                    Task task = Task.Run(() => APICustomer.PostRequestData("api/Output/DelElement", new BoundCustomerModel { ID = id }));
+
+                    task.ContinueWith((prevTask) => MessageBox.Show("Запись удалена. Обновите список", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information),
+                    TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                    task.ContinueWith((prevTask) =>
                     {
-                        var response = APICustomer.PostRequest("api/Output/DelElement", new BoundCustomerModel { ID = id });
-                        if (!response.Result.IsSuccessStatusCode)
+                        var ex = (Exception)prevTask.Exception;
+                        while (ex.InnerException != null)
                         {
-                            throw new Exception(APICustomer.GetError(response));
+                            ex = ex.InnerException;
                         }
-                    }
-                    catch (Exception ex)
-                    {
                         MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    LoadData();
+                    }, TaskContinuationOptions.OnlyOnFaulted);
                 }
             }
         }

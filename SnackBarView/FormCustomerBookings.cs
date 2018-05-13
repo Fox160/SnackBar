@@ -35,26 +35,23 @@ namespace SnackBarView
                                             " по " + dateTimePickerTo.Value.ToShortDateString());
                 reportViewer.LocalReport.SetParameters(parameter);
 
-                var response = APICustomer.PostRequest("api/Report/GetCustomerBookings", new BoundReportModel
-                {
-                    DateFrom = dateTimePickerFrom.Value,
-                    DateTo = dateTimePickerTo.Value
-                });
-                if (response.Result.IsSuccessStatusCode)
-                {
-                    var dataSource = APICustomer.GetElement<List<ModelCustomerBookingsView>>(response);
-                    ReportDataSource source = new ReportDataSource("DataSetBookings", dataSource);
-                    reportViewer.LocalReport.DataSources.Add(source);
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
-                }
+                var dataSource = Task.Run(() => APICustomer.PostRequestData<BoundReportModel, List<ModelCustomerBookingsView>>("api/Report/GetCustomerBookings",
+                    new BoundReportModel
+                    {
+                        DateFrom = dateTimePickerFrom.Value,
+                        DateTo = dateTimePickerTo.Value
+                    })).Result;
+                ReportDataSource source = new ReportDataSource("DataSetOrders", dataSource);
+                reportViewer.LocalReport.DataSources.Add(source);
 
                 reportViewer.RefreshReport();
             }
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -72,28 +69,27 @@ namespace SnackBarView
             };
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                try
+                string fileName = sfd.FileName;
+                Task task = Task.Run(() => APICustomer.PostRequestData("api/Report/SaveCustomerBookings", new BoundReportModel
                 {
-                    var response = APICustomer.PostRequest("api/Report/SaveCustomerBookings", new BoundReportModel
-                    {
-                        FileName = sfd.FileName,
-                        DateFrom = dateTimePickerFrom.Value,
-                        DateTo = dateTimePickerTo.Value
-                    });
-                    if (response.Result.IsSuccessStatusCode)
-                    {
-                        MessageBox.Show("Выполнено", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        throw new Exception(APICustomer.GetError(response));
-                    }
-                }
-                catch (Exception ex)
+                    FileName = fileName,
+                    DateFrom = dateTimePickerFrom.Value,
+                    DateTo = dateTimePickerTo.Value
+                }));
+
+                task.ContinueWith((prevTask) => MessageBox.Show("Список заказов сохранен", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information),
+                TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                task.ContinueWith((prevTask) =>
                 {
+                    var ex = (Exception)prevTask.Exception;
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                    }
                     MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                }, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
     }
-    }
+ }

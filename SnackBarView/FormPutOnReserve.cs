@@ -3,6 +3,7 @@ using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SnackBarView
@@ -18,41 +19,30 @@ namespace SnackBarView
         {
             try
             {
-                var responseC = APICustomer.GetRequest("api/Element/GetList");
-                if (responseC.Result.IsSuccessStatusCode)
+                List<ModelElementView> listC = Task.Run(() => APICustomer.GetRequestData<List<ModelElementView>>("api/Element/GetList")).Result;
+                if (listC != null)
                 {
-                    List<ModelElementView> list = APICustomer.GetElement<List<ModelElementView>>(responseC);
-                    if (list != null)
-                    {
-                        comboBoxComponent.DisplayMember = "ElementName";
-                        comboBoxComponent.ValueMember = "Id";
-                        comboBoxComponent.DataSource = list;
-                        comboBoxComponent.SelectedItem = null;
-                    }
+                    comboBoxComponent.DisplayMember = "ElementName";
+                    comboBoxComponent.ValueMember = "Id";
+                    comboBoxComponent.DataSource = listC;
+                    comboBoxComponent.SelectedItem = null;
                 }
-                else
+
+                List<ModelReserveView> listS = Task.Run(() => APICustomer.GetRequestData<List<ModelReserveView>>("api/Reserve/GetList")).Result;
+                if (listS != null)
                 {
-                    throw new Exception(APICustomer.GetError(responseC));
-                }
-                var responseS = APICustomer.GetRequest("api/Reserve/GetList");
-                if (responseS.Result.IsSuccessStatusCode)
-                {
-                    List<ModelReserveView> list = APICustomer.GetElement<List<ModelReserveView>>(responseS);
-                    if (list != null)
-                    {
-                        comboBoxStock.DisplayMember = "ReserveName";
-                        comboBoxStock.ValueMember = "ID";
-                        comboBoxStock.DataSource = list;
-                        comboBoxStock.SelectedItem = null;
-                    }
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(responseC));
+                    comboBoxStock.DisplayMember = "ReserveName";
+                    comboBoxStock.ValueMember = "Id";
+                    comboBoxStock.DataSource = listS;
+                    comboBoxStock.SelectedItem = null;
                 }
             }
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -76,32 +66,42 @@ namespace SnackBarView
             }
             try
             {
-                var response = APICustomer.PostRequest("api/Main/PutElementOnReserve", new BoundResElementModel
+                int componentId = Convert.ToInt32(comboBoxComponent.SelectedValue);
+                int stockId = Convert.ToInt32(comboBoxStock.SelectedValue);
+                int count = Convert.ToInt32(textBoxCount.Text);
+                Task task = Task.Run(() => APICustomer.PostRequestData("api/Main/PutElementOnReserve", new BoundResElementModel
                 {
-                    ElementID = Convert.ToInt32(comboBoxComponent.SelectedValue),
-                    ReserveID = Convert.ToInt32(comboBoxStock.SelectedValue),
-                    Count = Convert.ToInt32(textBoxCount.Text)
-                });
-                if (response.Result.IsSuccessStatusCode)
+                    ElementID = componentId,
+                    ReserveID = stockId,
+                    Count = count
+                }));
+
+                task.ContinueWith((prevTask) => MessageBox.Show("Склад пополнен", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information),
+                    TaskContinuationOptions.OnlyOnRanToCompletion);
+                task.ContinueWith((prevTask) =>
                 {
-                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    DialogResult = DialogResult.OK;
-                    Close();
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
-                }
+                    var ex = (Exception)prevTask.Exception;
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                    }
+                    MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }, TaskContinuationOptions.OnlyOnFaulted);
+
+                Close();
             }
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-            DialogResult = DialogResult.Cancel;
             Close();
         }
     }
