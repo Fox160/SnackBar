@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnackBarModel", "SnackBarModel\SnackBarModel.csproj", "{28FF25B2-96C9-4EEC-B1D7-FA93CE20BC6B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnackBarService", "SnackBarService\SnackBarService.csproj", "{147539BB-18F9-4D14-A8A0-8F9E6E41B6DA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnackBarView", "SnackBarView\SnackBarView.csproj", "{AB4FD6EF-AFB9-40A9-B747-EFCE82D1E460}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfSnackBar", "WpfSnackBar\WpfSnackBar.csproj", "{B45B1505-93D8-4BE5-9029-31D0DBD3E325}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,8 +29,15 @@ Global
 		{AB4FD6EF-AFB9-40A9-B747-EFCE82D1E460}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB4FD6EF-AFB9-40A9-B747-EFCE82D1E460}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB4FD6EF-AFB9-40A9-B747-EFCE82D1E460}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B45B1505-93D8-4BE5-9029-31D0DBD3E325}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B45B1505-93D8-4BE5-9029-31D0DBD3E325}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B45B1505-93D8-4BE5-9029-31D0DBD3E325}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B45B1505-93D8-4BE5-9029-31D0DBD3E325}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {803D422F-6EFE-4AD4-8861-3D6301518D42}
 	EndGlobalSection
 EndGlobal
