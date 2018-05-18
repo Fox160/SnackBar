@@ -9,6 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity.SqlServer;
 using System.Data.Entity;
+using System.Net.Mail;
+using System.Configuration;
+using System.Net;
 
 namespace SnackBarService.ImplementationsDB
 {
@@ -50,7 +53,7 @@ namespace SnackBarService.ImplementationsDB
 
         public void createOrder(BoundBookingModel model)
         {
-            context.Bookings.Add(new Booking
+            var order = new Booking
             {
                 CustomerID = model.CustomerID,
                 OutputID = model.OutputID,
@@ -58,8 +61,14 @@ namespace SnackBarService.ImplementationsDB
                 Count = model.Count,
                 Summa = model.Summa,
                 Status = StatusOfBooking.Принятый
-            });
+            };
+            context.Bookings.Add(order);
             context.SaveChanges();
+
+            var client = context.Customers.FirstOrDefault(x => x.ID == model.CustomerID);
+            SendEmail(client.Mail, "Оповещение по заказам",
+                string.Format("Заказ №{0} от {1} создан успешно", order.ID,
+                order.DateOfCreate.ToShortDateString()));
         }
 
         public void takeOrderInWork(BoundBookingModel model)
@@ -68,21 +77,24 @@ namespace SnackBarService.ImplementationsDB
             {
                 try
                 {
-                    Booking element = context.Bookings.FirstOrDefault(rec => rec.ID == model.ID);
+
+                    Booking element = context.Bookings.Include(rec => rec.Customer).FirstOrDefault(rec => rec.ID == model.ID);
                     if (element == null)
                     {
                         throw new Exception("Элемент не найден");
                     }
-                    var outputElements = context.OutputElements
+                    var productComponents = context.OutputElements
                                                 .Include(rec => rec.Element)
                                                 .Where(rec => rec.OutputID == element.OutputID);
-                    foreach (var productComponent in outputElements)
+                    // списываем
+                    foreach (var productComponent in productComponents)
                     {
                         int countOnStocks = productComponent.Count * element.Count;
                         var stockComponents = context.ReserveElements
                                                     .Where(rec => rec.ElementID == productComponent.ElementID);
                         foreach (var stockComponent in stockComponents)
                         {
+                            // компонентов на одном слкаде может не хватать
                             if (stockComponent.Count >= countOnStocks)
                             {
                                 stockComponent.Count -= countOnStocks;
@@ -108,6 +120,9 @@ namespace SnackBarService.ImplementationsDB
                     element.DateOfImplement = DateTime.Now;
                     element.Status = StatusOfBooking.Выполняемый;
                     context.SaveChanges();
+                    Customer customer = context.Customers.FirstOrDefault(x => x.ID == element.CustomerID);
+                    SendEmail(customer.Mail, "Оповещение по заказам",
+                        string.Format("Заказ №{0} от {1} передеан в работу", element.ID, element.DateOfCreate.ToShortDateString()));
                     transaction.Commit();
                 }
                 catch (Exception)
@@ -127,6 +142,10 @@ namespace SnackBarService.ImplementationsDB
             }
             element.Status = StatusOfBooking.Готов;
             context.SaveChanges();
+            Customer customer = context.Customers.FirstOrDefault(x => x.ID == element.CustomerID);
+            SendEmail(customer.Mail, "Оповещение по заказам",
+                string.Format("Заказ №{0} от {1} передан на оплату", element.ID,
+                element.DateOfCreate.ToShortDateString()));
         }
 
         public void payOrder(int id)
@@ -138,6 +157,9 @@ namespace SnackBarService.ImplementationsDB
             }
             element.Status = StatusOfBooking.Оплаченный;
             context.SaveChanges();
+            Customer customer = context.Customers.FirstOrDefault(x => x.ID == element.CustomerID);
+            SendEmail(customer.Mail, "Оповещение по заказам",
+                string.Format("Заказ №{0} от {1} оплачен успешно", element.ID, element.DateOfCreate.ToShortDateString()));
         }
 
         public void putComponentOnReserve(BoundResElementModel model)
@@ -159,6 +181,40 @@ namespace SnackBarService.ImplementationsDB
                 });
             }
             context.SaveChanges();
+        }
+
+        private void SendEmail(string mailAddress, string subject, string text)
+        {
+            MailMessage objMailMessage = new MailMessage();
+            SmtpClient objSmtpClient = null;
+
+            try
+            {
+                objMailMessage.From = new MailAddress(ConfigurationManager.AppSettings["MailLogin"]);
+                objMailMessage.To.Add(new MailAddress(mailAddress));
+                objMailMessage.Subject = subject;
+                objMailMessage.Body = text;
+                objMailMessage.SubjectEncoding = System.Text.Encoding.UTF8;
+                objMailMessage.BodyEncoding = System.Text.Encoding.UTF8;
+
+                objSmtpClient = new SmtpClient("smtp.gmail.com", 587);
+                objSmtpClient.UseDefaultCredentials = false;
+                objSmtpClient.EnableSsl = true;
+                objSmtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                objSmtpClient.Credentials = new NetworkCredential(ConfigurationManager.AppSettings["MailLogin"],
+                    ConfigurationManager.AppSettings["MailPassword"]);
+
+                objSmtpClient.Send(objMailMessage);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                objMailMessage = null;
+                objSmtpClient = null;
+            }
         }
     }
 }

@@ -65,6 +65,9 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="OpenPop, Version=2.0.6.1120, Culture=neutral, PublicKeyToken=6bdb97f144b7efc8, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenPop.NET.2.0.6.1120\lib\net40\OpenPop.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
@@ -133,6 +136,12 @@
     <Compile Include="FormExecutors.designer.cs">
       <DependentUpon>FormExecutors.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormMails.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormMails.Designer.cs">
+      <DependentUpon>FormMails.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -188,6 +197,7 @@
       <DependentUpon>FormTakeBookingInWork.cs</DependentUpon>
     </Compile>
     <Compile Include="HttpErrorMessage.cs" />
+    <Compile Include="MailClient.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlServerTypes\Loader.cs" />
@@ -214,6 +224,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormExecutors.resx">
       <DependentUpon>FormExecutors.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMails.resx">
+      <DependentUpon>FormMails.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>

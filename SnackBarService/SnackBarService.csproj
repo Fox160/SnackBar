@@ -51,6 +51,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
@@ -66,6 +67,7 @@
     <Compile Include="DataFromUser\BoundElementModel.cs" />
     <Compile Include="DataFromUser\BoundExecutorModel.cs" />
     <Compile Include="DataFromUser\BoundBookingModel.cs" />
+    <Compile Include="DataFromUser\BoundMessageInfoModel.cs" />
     <Compile Include="DataFromUser\BoundOutputModel.cs" />
     <Compile Include="DataFromUser\BoundProdElementModel.cs" />
     <Compile Include="DataFromUser\BoundReportModel.cs" />
@@ -76,6 +78,7 @@
     <Compile Include="ImplementationsDB\ElementServiceDB.cs" />
     <Compile Include="ImplementationsDB\ExecutorServiceDB.cs" />
     <Compile Include="ImplementationsDB\MainServiceDB.cs" />
+    <Compile Include="ImplementationsDB\MessageInfoServiceDB.cs" />
     <Compile Include="ImplementationsDB\OutputServiceDB.cs" />
     <Compile Include="ImplementationsDB\ReportServiceDB.cs" />
     <Compile Include="ImplementationsDB\ReserveServiceDB.cs" />
@@ -89,12 +92,21 @@
     <Compile Include="Interfaces\InterfaceComponentService.cs" />
     <Compile Include="Interfaces\InterfaceExecutorService.cs" />
     <Compile Include="Interfaces\InterfaceMainService.cs" />
+    <Compile Include="Interfaces\InterfaceMessageInfoService.cs" />
     <Compile Include="Interfaces\InterfaceOutputService.cs" />
     <Compile Include="Interfaces\InterfaceReportService.cs" />
     <Compile Include="Interfaces\InterfaceReserveService.cs" />
     <Compile Include="Migrations\201804171337569_FirstMigration.cs" />
     <Compile Include="Migrations\201804171337569_FirstMigration.Designer.cs">
       <DependentUpon>201804171337569_FirstMigration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201805050424009_AddFieldInClient.cs" />
+    <Compile Include="Migrations\201805050424009_AddFieldInClient.Designer.cs">
+      <DependentUpon>201805050424009_AddFieldInClient.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201805050505185_AddTableMessageInfo.cs" />
+    <Compile Include="Migrations\201805050505185_AddTableMessageInfo.Designer.cs">
+      <DependentUpon>201805050505185_AddTableMessageInfo.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -108,6 +120,7 @@
     <Compile Include="ViewModel\ModelElementView.cs" />
     <Compile Include="ViewModel\ModelExecutorView.cs" />
     <Compile Include="ViewModel\ModelBookingView.cs" />
+    <Compile Include="ViewModel\ModelMessageInfoView.cs" />
     <Compile Include="ViewModel\ModelProdElementView.cs" />
     <Compile Include="ViewModel\ModelOutputView.cs" />
     <Compile Include="ViewModel\ModelReserveElementView.cs" />
@@ -130,6 +143,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201804171337569_FirstMigration.resx">
       <DependentUpon>201804171337569_FirstMigration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201805050424009_AddFieldInClient.resx">
+      <DependentUpon>201805050424009_AddFieldInClient.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201805050505185_AddTableMessageInfo.resx">
+      <DependentUpon>201805050505185_AddTableMessageInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

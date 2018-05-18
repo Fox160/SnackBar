@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace SnackBarService
 {
-    [Table("AbstractDatabase")]
     public class AbstractDbContext : DbContext
     {
         public AbstractDbContext() : base("AbstractDbContext")
@@ -34,6 +33,9 @@ namespace SnackBarService
         public virtual DbSet<Reserve> Reserves { get; set; }
 
         public virtual DbSet<ReserveElement> ReserveElements { get; set; }
+
+        public virtual DbSet<MessageInfo> MessageInfos { get; set; }
+
 
         public override int SaveChanges()
         {
