@@ -25,7 +25,8 @@ namespace SnackBarService.ImplementationsDB
                 .Select(rec => new ModelCustomerView
                 {
                     ID = rec.ID,
-                    CustomerFullName = rec.CustomerFullName
+                    CustomerFullName = rec.CustomerFullName,
+                    Mail = rec.Mail
                 })
                 .ToList();
             return result;
@@ -39,7 +40,19 @@ namespace SnackBarService.ImplementationsDB
                 return new ModelCustomerView
                 {
                     ID = element.ID,
-                    CustomerFullName = element.CustomerFullName
+                    CustomerFullName = element.CustomerFullName,
+                    Mail = element.Mail,
+                    Messages = context.MessageInfos
+                            .Where(recM => recM.CustomerId == element.ID)
+                            .OrderByDescending(recM => recM.DateDelivery)
+                            .Select(recM => new ModelMessageInfoView
+                            {
+                                MessageId = recM.MessageId,
+                                DateDelivery = recM.DateDelivery,
+                                Subject = recM.Subject,
+                                Body = recM.Body
+                            })
+                            .ToList()
                 };
             }
             throw new Exception("Элемент не найден");
@@ -54,7 +67,8 @@ namespace SnackBarService.ImplementationsDB
             }
             context.Customers.Add(new Customer
             {
-                CustomerFullName = model.CustomerFullName
+                CustomerFullName = model.CustomerFullName,
+                Mail = model.Mail
             });
             context.SaveChanges();
         }
@@ -73,6 +87,7 @@ namespace SnackBarService.ImplementationsDB
                 throw new Exception("Элемент не найден");
             }
             element.CustomerFullName = model.CustomerFullName;
+            element.Mail = model.Mail;
             context.SaveChanges();
         }
 

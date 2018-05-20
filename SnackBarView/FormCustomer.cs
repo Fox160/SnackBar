@@ -3,6 +3,7 @@ using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -21,12 +22,18 @@ namespace SnackBarView
 
         private void FormClient_Load(object sender, EventArgs e)
         {
+
             if (id.HasValue)
             {
                 try
                 {
-                    var client = Task.Run(() => APICustomer.GetRequestData<ModelCustomerView>("api/Customer/Get/" + id.Value)).Result;
-                    textBoxFullName.Text = client.CustomerFullName;
+                    var customer = Task.Run(() => APICustomer.GetRequestData<ModelCustomerView>("api/Customer/Get/" + id.Value)).Result;
+                    textBoxFullName.Text = customer.CustomerFullName;
+                    textBoxMail.Text = customer.Mail;
+                    dataGridView.DataSource = customer.Messages;
+                    dataGridView.Columns[0].Visible = false;
+                    dataGridView.Columns[1].Visible = false;
+                    dataGridView.Columns[4].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
                 }
                 catch (Exception ex)
                 {
@@ -47,20 +54,32 @@ namespace SnackBarView
                 return;
             }
             string fio = textBoxFullName.Text;
+            string mail = textBoxMail.Text;
+            if (!string.IsNullOrEmpty(mail))
+            {
+                if (!Regex.IsMatch(mail, @"^(?("")(""[^""]+?""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
+                @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-\w]*[0-9a-z]*\.)+[a-z0-9]{2,17}))$"))
+                {
+                    MessageBox.Show("Неверный формат для электронной почты", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
             Task task;
             if (id.HasValue)
             {
                 task = Task.Run(() => APICustomer.PostRequestData("api/Customer/UpdElement", new BoundCustomerModel
                 {
                     ID = id.Value,
-                    CustomerFullName = fio
+                    CustomerFullName = fio,
+                    Mail = mail
                 }));
             }
             else
             {
                 task = Task.Run(() => APICustomer.PostRequestData("api/Customer/AddElement", new BoundCustomerModel
                 {
-                    CustomerFullName = fio
+                    CustomerFullName = fio,
+                    Mail = mail
                 }));
             }
 

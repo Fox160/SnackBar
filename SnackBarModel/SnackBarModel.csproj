@@ -51,6 +51,7 @@
     <Compile Include="Element.cs" />
     <Compile Include="Executor.cs" />
     <Compile Include="Booking.cs" />
+    <Compile Include="MessageInfo.cs" />
     <Compile Include="StatusOfBooking.cs" />
     <Compile Include="Output.cs" />
     <Compile Include="OutputElement.cs" />

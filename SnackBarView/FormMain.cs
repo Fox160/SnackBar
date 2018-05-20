@@ -100,23 +100,27 @@ namespace SnackBarView
             {
                 int id = Convert.ToInt32(dataGridViewMain.SelectedRows[0].Cells[0].Value);
 
-                Task task = Task.Run(() => APICustomer.PostRequestData("api/Main/FinishBooking", new BoundBookingModel
-                {
-                    ID = id
-                }));
+                Task task = Task.Run(() =>
+                    {
+                        APICustomer.PostRequestData("api/Main/FinishBooking", new BoundBookingModel{ ID = id });
+                    }
+                );
 
                 task.ContinueWith((prevTask) => MessageBox.Show("Статус заказа изменен. Обновите список", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information),
                 TaskContinuationOptions.OnlyOnRanToCompletion);
 
-                task.ContinueWith((prevTask) =>
-                {
-                    var ex = (Exception)prevTask.Exception;
-                    while (ex.InnerException != null)
-                    {
-                        ex = ex.InnerException;
-                    }
-                    MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }, TaskContinuationOptions.OnlyOnFaulted);
+                task.ContinueWith(
+                    (prevTask) =>
+                        {
+                            var ex = (Exception)prevTask.Exception;
+                            while (ex.InnerException != null)
+                            {
+                                ex = ex.InnerException;
+                            }
+                            MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }, 
+                    TaskContinuationOptions.OnlyOnFaulted
+                );
             }
         }
 
@@ -126,23 +130,28 @@ namespace SnackBarView
             {
                 int id = Convert.ToInt32(dataGridViewMain.SelectedRows[0].Cells[0].Value);
 
-                Task task = Task.Run(() => APICustomer.PostRequestData("api/Main/PayBooking", new BoundBookingModel
-                {
-                    ID = id
-                }));
+
+                Task task = Task.Run(() =>
+                    {
+                        APICustomer.PostRequestData("api/Main/PayBooking", new BoundBookingModel { ID = id });
+                    }
+                );
 
                 task.ContinueWith((prevTask) => MessageBox.Show("Статус заказа изменен. Обновите список", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information),
                 TaskContinuationOptions.OnlyOnRanToCompletion);
 
-                task.ContinueWith((prevTask) =>
-                {
-                    var ex = (Exception)prevTask.Exception;
-                    while (ex.InnerException != null)
-                    {
-                        ex = ex.InnerException;
-                    }
-                    MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }, TaskContinuationOptions.OnlyOnFaulted);
+                task.ContinueWith(
+                    (prevTask) =>
+                        {
+                            var ex = (Exception)prevTask.Exception;
+                            while (ex.InnerException != null)
+                            {
+                                ex = ex.InnerException;
+                            }
+                            MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }, 
+                    TaskContinuationOptions.OnlyOnFaulted
+                );
             }
         }
 
@@ -189,6 +198,12 @@ namespace SnackBarView
         private void заказыКлиентовToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var form = new FormCustomerBookings();
+            form.ShowDialog();
+        }
+
+        private void письмаToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = new FormMails();
             form.ShowDialog();
         }
     }

@@ -15,6 +15,8 @@ namespace SnackBarModel
         [Required]
         public string CustomerFullName { get; set; }
 
+        public string Mail { get; set; }
+
         [ForeignKey("CustomerID")]
         public virtual List<Booking> Bookings { get; set; }
     }

@@ -20,6 +20,7 @@ namespace SnackBarView
         static void Main()
         {
             APICustomer.Connect();
+            MailClient.CheckMail();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new FormMain());

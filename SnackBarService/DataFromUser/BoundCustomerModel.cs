@@ -14,6 +14,9 @@ namespace SnackBarService.DataFromUser
         public int ID { get; set; }
 
         [DataMember]
+        public string Mail { get; set; }
+
+        [DataMember]
         public string CustomerFullName { get; set; }
     }
 }
