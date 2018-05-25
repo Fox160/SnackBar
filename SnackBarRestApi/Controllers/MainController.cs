@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using SnackBarRestApi.Services;
 
 namespace SnackBarRestApi.Controllers
 {
@@ -57,6 +58,18 @@ namespace SnackBarRestApi.Controllers
         public void PutElementOnReserve(BoundResElementModel model)
         {
             _service.putComponentOnReserve(model);
+        }
+
+        [HttpGet]
+        public IHttpActionResult GetInfo()
+        {
+            ReflectionService service = new ReflectionService();
+            var list = service.GetInfoByAssembly();
+            if (list == null)
+            {
+                InternalServerError(new Exception("Нет данных"));
+            }
+            return Ok(list);
         }
     }
 }
