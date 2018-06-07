@@ -25,5 +25,11 @@ namespace SnackBarModel
         public DateTime DateOfCreate { get; set; }
 
         public DateTime? DateOfImplement { get; set; }
+
+        public virtual Customer Customer { get; set; }
+
+        public virtual Output Output { get; set; }
+
+        public virtual Executor Executor { get; set; }
     }
 }
