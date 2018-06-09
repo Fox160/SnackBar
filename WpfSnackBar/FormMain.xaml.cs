@@ -16,6 +16,8 @@ using System.Windows.Shapes;
 using Unity;
 using Unity.Attributes;
 using System.Data;
+using Microsoft.Win32;
+using SnackBarService.DataFromUser;
 
 namespace WpfSnackBar
 {
@@ -29,10 +31,13 @@ namespace WpfSnackBar
 
         private readonly InterfaceMainService service;
 
-        public FormMain(InterfaceMainService service)
+        private readonly InterfaceReportService reportService;
+
+        public FormMain(InterfaceMainService service, InterfaceReportService reportService)
         {
             InitializeComponent();
             this.service = service;
+            this.reportService = reportService;
         }
 
         private void LoadData()
@@ -147,6 +152,41 @@ namespace WpfSnackBar
         private void buttonRef_Click(object sender, EventArgs e)
         {
             LoadData();
+        }
+
+        private void прайсИзделийToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "doc|*.doc|docx|*.docx"
+            };
+            if (sfd.ShowDialog() == true)
+            {
+                try
+                {
+                    reportService.SaveOutputPrice(new BoundReportModel
+                    {
+                        FileName = sfd.FileName
+                    });
+                    MessageBox.Show("Выполнено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void загруженностьСкладовToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = Container.Resolve<FormReservesLoad>();
+            form.ShowDialog();
+        }
+
+        private void заказыКлиентовToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = Container.Resolve<FormCustomerBookings>();
+            form.ShowDialog();
         }
     }
 }

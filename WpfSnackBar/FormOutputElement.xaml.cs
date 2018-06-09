@@ -60,13 +60,7 @@ namespace WpfSnackBar
             if (model != null)
             {
                 comboBoxComponent.IsEnabled = false;
-                foreach (ModelElementView item in list)
-                {
-                    if (item.ElementName == model.ElementName)
-                    {
-                        comboBoxComponent.SelectedItem = item;
-                    }
-                }
+                comboBoxComponent.SelectedItem = model;
                 textBoxCount.Text = model.Count.ToString();
             }
         }
@@ -89,7 +83,7 @@ namespace WpfSnackBar
                 {
                     model = new ModelProdElementView
                     {
-                        ElementID = Convert.ToInt32(comboBoxComponent.SelectedValue),
+                        ElementID = ((ModelElementView) comboBoxComponent.SelectedItem).ID,
                         ElementName = comboBoxComponent.Text,
                         Count = Convert.ToInt32(textBoxCount.Text)
                     };

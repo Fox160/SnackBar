@@ -82,7 +82,7 @@ namespace WpfSnackBar
                     int id = ((ModelOutputView)comboBoxProduct.SelectedItem).ID;
                     ModelOutputView product = serviceProduct.getElement(id);
                     int count = Convert.ToInt32(textBoxCount.Text);
-                    textBoxSum.Text = (count * product.Price).ToString();
+                    textBoxSum.Text = Convert.ToInt32(count * product.Price).ToString();
                 }
                 catch (Exception ex)
                 {
@@ -122,8 +122,8 @@ namespace WpfSnackBar
             {
                 serviceMain.createOrder(new BoundBookingModel
                 {
-                    CustomerID = ((ModelCustomerView)comboBoxClient.SelectedItem).ID,
-                    OutputID = ((ModelOutputView)comboBoxProduct.SelectedItem).ID,
+                    CustomerID = Convert.ToInt32(((ModelCustomerView)comboBoxClient.SelectedItem).ID),
+                    OutputID = Convert.ToInt32(((ModelOutputView)comboBoxProduct.SelectedItem).ID),
                     Count = Convert.ToInt32(textBoxCount.Text),
                     Summa = Convert.ToInt32(textBoxSum.Text)
                 });

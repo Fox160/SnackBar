@@ -90,8 +90,8 @@ namespace WpfSnackBar
             {
                 serviceMain.putComponentOnReserve(new BoundResElementModel
                 {
-                    ElementID = Convert.ToInt32(comboBoxComponent.SelectedValue),
-                    ReserveID = Convert.ToInt32(comboBoxStock.SelectedValue),
+                    ElementID = ((ModelElementView) comboBoxComponent.SelectedItem).ID,
+                    ReserveID = ((ModelReserveView) comboBoxStock.SelectedItem).ID,
                     Count = Convert.ToInt32(textBoxCount.Text)
                 });
                 MessageBox.Show("Сохранение прошло успешно", "Информация", 

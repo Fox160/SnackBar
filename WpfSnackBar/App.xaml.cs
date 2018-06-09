@@ -4,11 +4,13 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using SnackBarService.ImplementationsList;
+using SnackBarService;
+using SnackBarService.ImplementationsDB;
 using SnackBarService.Interfaces;
 using System.Windows;
 using Unity;
 using Unity.Lifetime;
+using System.Data.Entity;
 
 namespace WpfSnackBar
 {
@@ -17,6 +19,7 @@ namespace WpfSnackBar
     /// </summary>
     public partial class App : Application
     {
+
         [STAThread]
         public static void Main()
         {
@@ -29,12 +32,15 @@ namespace WpfSnackBar
         public static IUnityContainer BuildUnityContainer()
         {
             var currentContainer = new UnityContainer();
-            currentContainer.RegisterType<InterfaceCustomerService, CustomerServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceComponentService, ElementServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceExecutorService, ExecutorServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceOutputService, OutputServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceReserveService, ReserveServiceList>(new HierarchicalLifetimeManager());
-            currentContainer.RegisterType<InterfaceMainService, MainServiceList>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<DbContext, AbstractDbContext>(new HierarchicalLifetimeManager());
+
+            currentContainer.RegisterType<InterfaceCustomerService, CustomerServiceDB>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceComponentService, ElementServiceDB>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceExecutorService, ExecutorServiceDB>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceOutputService, OutputServiceDB>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceReserveService, ReserveServiceDB>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceMainService, MainServiceBD>(new HierarchicalLifetimeManager());
+            currentContainer.RegisterType<InterfaceReportService, ReportServiceDB>(new HierarchicalLifetimeManager());
 
             return currentContainer;
         }
