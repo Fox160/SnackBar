@@ -32,24 +32,24 @@ namespace WpfSnackBar
         {
             try
             {
-                var response = APICustomer.GetRequest("api/Report/GetReservesLoad");
-                if (response.Result.IsSuccessStatusCode)
+                dataGridView.Items.Clear();
+                foreach (var elem in Task.Run(() => APICustomer.GetRequestData<List<ModelReservesLoadView>>("api/Report/GetReservesLoad")).Result)
                 {
-                    dataGridView.Items.Clear();
-                    foreach (var elem in APICustomer.GetElement<List<ModelReservesLoadView>>(response))
+                    dataGridView.Items.Add(new object[] { elem.ReserveName, "", "" });
+                    foreach (var listElem in elem.Elements)
                     {
-                        dataGridView.Items.Add(new object[] { elem.ReserveName, "", "" });
-                        foreach (var listElem in elem.Elements)
-                        {
-                            dataGridView.Items.Add(new object[] { "", listElem.ElementName, listElem.Count });
-                        }
-                        dataGridView.Items.Add(new object[] { "Итого", "", elem.TotalCount });
-                        dataGridView.Items.Add(new object[] { });
+                        dataGridView.Items.Add(new object[] { "", listElem.ElementName, listElem.Count });
                     }
+                    dataGridView.Items.Add(new object[] { "Итого", "", elem.TotalCount });
+                    dataGridView.Items.Add(new object[] { });
                 }
             }
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -62,25 +62,23 @@ namespace WpfSnackBar
             };
             if (sfd.ShowDialog() == true)
             {
-                try
+                string fileName = sfd.FileName;
+                Task task = Task.Run(() => APICustomer.PostRequestData("api/Report/SaveReservesLoad", new BoundReportModel
                 {
-                    var response = APICustomer.PostRequest("api/Report/SaveReservesLoad", new BoundReportModel
-                    {
-                        FileName = sfd.FileName
-                    });
-                    if (response.Result.IsSuccessStatusCode)
-                    {
-                        MessageBox.Show("Выполнено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    else
-                    {
-                        throw new Exception(APICustomer.GetError(response));
-                    }
-                }
-                catch (Exception ex)
+                    FileName = fileName
+                }));
+
+                task.ContinueWith((prevTask) => MessageBox.Show("Выполнено", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information),
+                    TaskContinuationOptions.OnlyOnRanToCompletion);
+                task.ContinueWith((prevTask) =>
                 {
+                    var ex = (Exception)prevTask.Exception;
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                    }
                     MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                }, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
     }

@@ -49,6 +49,12 @@ namespace WpfSnackBar
 
         private void buttonMake_Click(object sender, EventArgs e)
         {
+            if (dateTimePickerFrom.SelectedDate == null || dateTimePickerTo.SelectedDate == null)
+            {
+                MessageBox.Show("Дата не выбрана", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             if (dateTimePickerFrom.SelectedDate.Value.Date >= dateTimePickerTo.SelectedDate.Value.Date)
             {
                 MessageBox.Show("Дата начала должна быть меньше даты окончания", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -61,26 +67,25 @@ namespace WpfSnackBar
                                             " по " + dateTimePickerTo.SelectedDate.Value.Date.ToShortDateString());
                 reportViewer.LocalReport.SetParameters(parameter);
 
-                var response = APICustomer.PostRequest("api/Report/GetCustomerBookings", new BoundReportModel
-                {
-                    DateFrom = dateTimePickerFrom.SelectedDate.Value,
-                    DateTo = dateTimePickerTo.SelectedDate.Value
-                });
-                if (response.Result.IsSuccessStatusCode)
-                {
-                    var dataSource = APICustomer.GetElement<List<ModelCustomerBookingsView>>(response);
-                    ReportDataSource source = new ReportDataSource("DataSetBookings", dataSource);
-                    reportViewer.LocalReport.DataSources.Add(source);
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
-                }
+                DateTime dateFrom = dateTimePickerFrom.SelectedDate.Value;
+                DateTime dateTo = dateTimePickerTo.SelectedDate.Value;
 
+                var dataSource = Task.Run(() => APICustomer.PostRequestData<BoundReportModel, List<ModelCustomerBookingsView>>("api/Report/GetCustomerBookings",
+                new BoundReportModel
+                {
+                    DateFrom = dateFrom,
+                    DateTo = dateTo
+                })).Result;
+                ReportDataSource source = new ReportDataSource("DataSetBookings", dataSource);
+                reportViewer.LocalReport.DataSources.Add(source);
                 reportViewer.RefreshReport();
             }
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -98,27 +103,29 @@ namespace WpfSnackBar
             };
             if (sfd.ShowDialog() == true)
             {
-                try
+                string fileName = sfd.FileName;
+                DateTime dateFrom = dateTimePickerFrom.SelectedDate.Value;
+                DateTime dateTo = dateTimePickerTo.SelectedDate.Value;
+
+                Task task = Task.Run(() => APICustomer.PostRequestData("api/Report/SaveCustomerBookings", new BoundReportModel
                 {
-                    var response = APICustomer.PostRequest("api/Report/SaveCustomerBookings", new BoundReportModel
-                    {
-                        FileName = sfd.FileName,
-                        DateFrom = dateTimePickerFrom.SelectedDate.Value,
-                        DateTo = dateTimePickerTo.SelectedDate.Value
-                    });
-                    if (response.Result.IsSuccessStatusCode)
-                    {
-                        MessageBox.Show("Выполнено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    else
-                    {
-                        throw new Exception(APICustomer.GetError(response));
-                    }
-                }
-                catch (Exception ex)
+                    FileName = fileName,
+                    DateFrom = dateFrom,
+                    DateTo = dateTo
+                }));
+
+                task.ContinueWith((prevTask) => MessageBox.Show("Список заказов сохранен", "Успех", MessageBoxButton.OK, MessageBoxImage.Information),
+                TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                task.ContinueWith((prevTask) =>
                 {
+                    var ex = (Exception)prevTask.Exception;
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                    }
                     MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                }, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
     }

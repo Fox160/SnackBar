@@ -35,21 +35,17 @@ namespace WpfSnackBar
         {
             try
             {
-                var response = APICustomer.GetRequest("api/Element/GetList");
-                if (response.Result.IsSuccessStatusCode)
-                {
-                    comboBoxComponent.DisplayMemberPath = "ElementName";
-                    comboBoxComponent.SelectedValuePath = "Id";
-                    comboBoxComponent.ItemsSource = APICustomer.GetElement<List<ModelElementView>>(response);
-                    comboBoxComponent.SelectedItem = null;
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
-                }
+                comboBoxComponent.DisplayMemberPath = "ElementName";
+                comboBoxComponent.SelectedValuePath = "Id";
+                comboBoxComponent.ItemsSource = Task.Run(() => APICustomer.GetRequestData<List<ModelElementView>>("api/Element/GetList")).Result;
+                comboBoxComponent.SelectedItem = null;
             }
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
@@ -79,7 +75,7 @@ namespace WpfSnackBar
                 {
                     model = new ModelProdElementView
                     {
-                        ElementID = ((ModelElementView) comboBoxComponent.SelectedItem).ID,
+                        ElementID = ((ModelElementView)comboBoxComponent.SelectedItem).ID,
                         ElementName = comboBoxComponent.Text,
                         Count = Convert.ToInt32(textBoxCount.Text)
                     };

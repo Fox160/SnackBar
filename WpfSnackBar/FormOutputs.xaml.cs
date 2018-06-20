@@ -38,25 +38,21 @@ namespace WpfSnackBar
         {
             try
             {
-                var response = APICustomer.GetRequest("api/Output/GetList");
-                if (response.Result.IsSuccessStatusCode)
+                List<ModelOutputView> list = Task.Run(() => APICustomer.GetRequestData<List<ModelOutputView>>("api/Output/GetList")).Result;
+                if (list != null)
                 {
-                    List<ModelOutputView> list = APICustomer.GetElement<List<ModelOutputView>>(response);
-                    if (list != null)
-                    {
-                        dataGridViewProducts.ItemsSource = list;
-                        dataGridViewProducts.Columns[0].Visibility = Visibility.Hidden;
-                        dataGridViewProducts.Columns[1].Width = DataGridLength.Auto;
-                        dataGridViewProducts.Columns[3].Visibility = Visibility.Hidden;
-                    }
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
+                    dataGridViewProducts.ItemsSource = list;
+                    dataGridViewProducts.Columns[0].Visibility = Visibility.Hidden;
+                    dataGridViewProducts.Columns[1].Width = DataGridLength.Auto;
+                    dataGridViewProducts.Columns[3].Visibility = Visibility.Hidden;
                 }
             }
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -86,21 +82,21 @@ namespace WpfSnackBar
                 if (MessageBox.Show("Удалить запись?", "Внимание",
                 MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-
                     int id = ((ModelOutputView)dataGridViewProducts.SelectedItem).ID;
-                    try
+                    Task task = Task.Run(() => APICustomer.PostRequestData("api/Output/DelElement", new BoundCustomerModel { ID = id }));
+
+                    task.ContinueWith((prevTask) => MessageBox.Show("Запись удалена. Обновите список", "Успех", MessageBoxButton.OK, MessageBoxImage.Information),
+                    TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                    task.ContinueWith((prevTask) =>
                     {
-                        var response = APICustomer.PostRequest("api/Output/DelElement", new BoundCustomerModel { ID = id });
-                        if (!response.Result.IsSuccessStatusCode)
+                        var ex = (Exception)prevTask.Exception;
+                        while (ex.InnerException != null)
                         {
-                            throw new Exception(APICustomer.GetError(response));
+                            ex = ex.InnerException;
                         }
-                    }
-                    catch (Exception ex)
-                    {
                         MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                    LoadData();
+                    }, TaskContinuationOptions.OnlyOnFaulted);
                 }
             }
         }
