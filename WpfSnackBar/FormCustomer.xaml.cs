@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -41,6 +42,11 @@ namespace WpfSnackBar
                 {
                     var client = Task.Run(() => APICustomer.GetRequestData<ModelCustomerView>("api/Customer/Get/" + id.Value)).Result;
                     textBoxFullName.Text = client.CustomerFullName;
+                    textBoxMail.Text = client.Mail;
+                    dataGridView.ItemsSource = client.Messages;
+                    dataGridView.Columns[0].Visibility = Visibility.Hidden;
+                    dataGridView.Columns[1].Visibility = Visibility.Hidden;
+                    dataGridView.Columns[4].Width = DataGridLength.Auto;
                 }
                 catch (Exception ex)
                 {
@@ -61,20 +67,32 @@ namespace WpfSnackBar
                 return;
             }
             string fio = textBoxFullName.Text;
+            string mail = textBoxMail.Text;
+            if (!string.IsNullOrEmpty(mail))
+            {
+                if (!Regex.IsMatch(mail, @"^(?("")(""[^""]+?""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
+                @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-\w]*[0-9a-z]*\.)+[a-z0-9]{2,17}))$"))
+                {
+                    MessageBox.Show("Неверный формат для электронной почты", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
             Task task;
             if (id.HasValue)
             {
                 task = Task.Run(() => APICustomer.PostRequestData("api/Customer/UpdElement", new BoundCustomerModel
                 {
                     ID = id.Value,
-                    CustomerFullName = fio
+                    CustomerFullName = fio,
+                    Mail = mail
                 }));
             }
             else
             {
                 task = Task.Run(() => APICustomer.PostRequestData("api/Customer/AddElement", new BoundCustomerModel
                 {
-                    CustomerFullName = fio
+                    CustomerFullName = fio,
+                    Mail = mail
                 }));
             }
             task.ContinueWith((prevTask) => MessageBox.Show("Сохранение прошло успешно. Обновите список", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information),

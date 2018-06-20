@@ -1,0 +1,12 @@
+﻿<Window x:Class="WpfSnackBar.FormMails"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfSnackBar"
+        mc:Ignorable="d"
+        Title="Письма" Height="489" Width="816">
+    <Grid>
+        <DataGrid x:Name="dataGridView" HorizontalAlignment="Left" Height="458" VerticalAlignment="Top" Width="808" Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" IsReadOnly="True"/>
+    </Grid>
+</Window>
