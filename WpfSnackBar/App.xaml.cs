@@ -22,6 +22,7 @@ namespace WpfSnackBar
         public static void Main()
         {
             APICustomer.Connect();
+            MailClient.CheckMail();
             var application = new App();
             application.Run(new FormMain());
         }
