@@ -35,41 +35,30 @@ namespace WpfSnackBar
         {
             try
             {
-                var responseC = APICustomer.GetRequest("api/Customer/GetList");
-                if (responseC.Result.IsSuccessStatusCode)
+                List<ModelCustomerView> list = Task.Run(() => APICustomer.GetRequestData<List<ModelCustomerView>>("api/Customer/GetList")).Result;
+                if (list != null)
                 {
-                    List<ModelCustomerView> list = APICustomer.GetElement<List<ModelCustomerView>>(responseC);
-                    if (list != null)
-                    {
-                        comboBoxClient.DisplayMemberPath = "CustomerFullName";
-                        comboBoxClient.SelectedValuePath = "Id";
-                        comboBoxClient.ItemsSource = list;
-                        comboBoxClient.SelectedItem = null;
-                    }
+                    comboBoxClient.DisplayMemberPath = "CustomerFullName";
+                    comboBoxClient.SelectedValuePath = "Id";
+                    comboBoxClient.ItemsSource = list;
+                    comboBoxClient.SelectedItem = null;
                 }
-                else
+
+                List<ModelOutputView> listP = Task.Run(() => APICustomer.GetRequestData<List<ModelOutputView>>("api/Output/GetList")).Result;
+                if (list != null)
                 {
-                    throw new Exception(APICustomer.GetError(responseC));
-                }
-                var responseP = APICustomer.GetRequest("api/Output/GetList");
-                if (responseP.Result.IsSuccessStatusCode)
-                {
-                    List<ModelOutputView> list = APICustomer.GetElement<List<ModelOutputView>>(responseP);
-                    if (list != null)
-                    {
-                        comboBoxProduct.DisplayMemberPath = "OutputName";
-                        comboBoxProduct.SelectedValuePath = "Id";
-                        comboBoxProduct.ItemsSource = list;
-                        comboBoxProduct.SelectedItem = null;
-                    }
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(responseP));
+                    comboBoxProduct.DisplayMemberPath = "OutputName";
+                    comboBoxProduct.SelectedValuePath = "Id";
+                    comboBoxProduct.ItemsSource = listP;
+                    comboBoxProduct.SelectedItem = null;
                 }
             }
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -81,20 +70,17 @@ namespace WpfSnackBar
                 try
                 {
                     int id = ((ModelOutputView)comboBoxProduct.SelectedItem).ID;
-                    var responseP = APICustomer.GetRequest("api/Output/Get/" + id);
-                    if (responseP.Result.IsSuccessStatusCode)
-                    {
-                        ModelOutputView product = APICustomer.GetElement<ModelOutputView>(responseP);
-                        int count = Convert.ToInt32(textBoxCount.Text);
-                        textBoxSum.Text = Convert.ToInt32(count * product.Price).ToString();
-                    }
-                    else
-                    {
-                        throw new Exception(APICustomer.GetError(responseP));
-                    }
+                    ModelOutputView product = Task.Run(() => APICustomer.GetRequestData<ModelOutputView>("api/Output/Get/" + id)).Result;
+                    int count = Convert.ToInt32(textBoxCount.Text);
+                    textBoxSum.Text = Convert.ToInt32(count * product.Price).ToString();
+
                 }
                 catch (Exception ex)
                 {
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                    }
                     MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -127,30 +113,31 @@ namespace WpfSnackBar
                 MessageBox.Show("Выберите изделие", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            try
+            int clientId = Convert.ToInt32(((ModelCustomerView)comboBoxClient.SelectedItem).ID);
+            int outputId = Convert.ToInt32(((ModelOutputView)comboBoxProduct.SelectedItem).ID);
+            int count = Convert.ToInt32(textBoxCount.Text);
+            int sum = Convert.ToInt32(textBoxSum.Text);
+            Task task = Task.Run(() => APICustomer.PostRequestData("api/Main/CreateBooking", new BoundBookingModel
             {
-                var response = APICustomer.PostRequest("api/Main/CreateBooking", new ModelBookingView
-                {
-                    CustomerID = Convert.ToInt32(((ModelCustomerView)comboBoxClient.SelectedItem).ID),
-                    OutputID = Convert.ToInt32(((ModelOutputView)comboBoxProduct.SelectedItem).ID),
-                    Count = Convert.ToInt32(textBoxCount.Text),
-                    Summa = Convert.ToInt32(textBoxSum.Text)
-                });
-                if (response.Result.IsSuccessStatusCode)
-                {
-                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
-                    DialogResult = true;
-                    Close();
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
-                }
-            }
-            catch (Exception ex)
+                CustomerID = clientId,
+                OutputID = outputId,
+                Count = count,
+                Summa = sum
+            }));
+
+            task.ContinueWith((prevTask) => MessageBox.Show("Сохранение прошло успешно. Обновите список", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information),
+                TaskContinuationOptions.OnlyOnRanToCompletion);
+            task.ContinueWith((prevTask) =>
             {
+                var ex = (Exception)prevTask.Exception;
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            }, TaskContinuationOptions.OnlyOnFaulted);
+
+            Close();
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)

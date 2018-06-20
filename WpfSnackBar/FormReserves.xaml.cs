@@ -38,20 +38,12 @@ namespace WpfSnackBar
         {
             try
             {
-                var response = APICustomer.GetRequest("api/Reserve/GetList");
-                if (response.Result.IsSuccessStatusCode)
+                List<ModelReserveView> list = Task.Run(() => APICustomer.GetRequestData<List<ModelReserveView>>("api/Reserve/GetList")).Result;
+                if (list != null)
                 {
-                    List<ModelReserveView> list = APICustomer.GetElement<List<ModelReserveView>>(response);
-                    if (list != null)
-                    {
-                        dataGridViewReserves.ItemsSource = list;
-                        dataGridViewReserves.Columns[0].Visibility = Visibility.Hidden;
-                        dataGridViewReserves.Columns[1].Width = DataGridLength.Auto;
-                    }
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
+                    dataGridViewReserves.ItemsSource = list;
+                    dataGridViewReserves.Columns[0].Visibility = Visibility.Hidden;
+                    dataGridViewReserves.Columns[1].Width = DataGridLength.Auto;
                 }
             }
             catch (Exception ex)
@@ -84,23 +76,24 @@ namespace WpfSnackBar
         {
             if (dataGridViewReserves.SelectedItem != null)
             {
-                if (MessageBox.Show("Удалить запись?", "Внимание", 
+                if (MessageBox.Show("Удалить запись?", "Внимание",
                     MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     int id = ((ModelReserveView)dataGridViewReserves.SelectedItem).ID;
-                    try
+                    Task task = Task.Run(() => APICustomer.PostRequestData("api/Reserve/DelElement", new BoundCustomerModel { ID = id }));
+
+                    task.ContinueWith((prevTask) => MessageBox.Show("Запись удалена. Обновите список", "Успех", MessageBoxButton.OK, MessageBoxImage.Information),
+                    TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                    task.ContinueWith((prevTask) =>
                     {
-                        var response = APICustomer.PostRequest("api/Reserve/DelElement", new BoundCustomerModel { ID = id });
-                        if (!response.Result.IsSuccessStatusCode)
+                        var ex = (Exception)prevTask.Exception;
+                        while (ex.InnerException != null)
                         {
-                            throw new Exception(APICustomer.GetError(response));
+                            ex = ex.InnerException;
                         }
-                    }
-                    catch (Exception ex)
-                    {
                         MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                    LoadData();
+                    }, TaskContinuationOptions.OnlyOnFaulted);
                 }
             }
         }

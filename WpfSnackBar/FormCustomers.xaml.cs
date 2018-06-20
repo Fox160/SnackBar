@@ -39,24 +39,22 @@ namespace WpfSnackBar
         {
             try
             {
-                var response = APICustomer.GetRequest("api/Customer/GetList");
-                if (response.Result.IsSuccessStatusCode)
+                List<ModelCustomerView> list = Task.Run(() => APICustomer.GetRequestData<List<ModelCustomerView>>("api/Customer/GetList")).Result;
+                if (list != null)
                 {
-                    List<ModelCustomerView> list = APICustomer.GetElement<List<ModelCustomerView>>(response);
-                    if (list != null)
-                    {
-                        dataGridViewClients.ItemsSource = list;
-                        dataGridViewClients.Columns[0].Visibility = Visibility.Hidden;
-                        dataGridViewClients.Columns[1].Width = DataGridLength.Auto;
-                    }
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
+                    dataGridViewClients.ItemsSource = list;
+                    dataGridViewClients.Columns[0].Visibility = Visibility.Hidden;
+                    dataGridViewClients.Columns[1].Width = DataGridLength.Auto;
                 }
             }
+
+
             catch (Exception ex)
             {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -91,19 +89,20 @@ namespace WpfSnackBar
                     MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     int id = ((ModelCustomerView)dataGridViewClients.SelectedItem).ID;
-                    try
+                    Task task = Task.Run(() => APICustomer.PostRequestData("api/Customer/DelElement", new BoundCustomerModel { ID = id }));
+
+                    task.ContinueWith((prevTask) => MessageBox.Show("Запись удалена. Обновите список", "Успех", MessageBoxButton.OK, MessageBoxImage.Information),
+                    TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                    task.ContinueWith((prevTask) =>
                     {
-                        var response = APICustomer.PostRequest("api/Customer/DelElement", new BoundCustomerModel { ID = id });
-                        if (!response.Result.IsSuccessStatusCode)
+                        var ex = (Exception)prevTask.Exception;
+                        while (ex.InnerException != null)
                         {
-                            throw new Exception(APICustomer.GetError(response));
+                            ex = ex.InnerException;
                         }
-                    }
-                    catch (Exception ex)
-                    {
                         MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                    LoadData();
+                    }, TaskContinuationOptions.OnlyOnFaulted);
                 }
             }
         }

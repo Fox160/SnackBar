@@ -42,22 +42,18 @@ namespace WpfSnackBar
             {
                 try
                 {
-                    var response = APICustomer.GetRequest("api/Output/Get/" + id.Value);
-                    if (response.Result.IsSuccessStatusCode)
-                    {
-                        var product = APICustomer.GetElement<ModelOutputView>(response);
-                        textBoxName.Text = product.OutputName;
-                        textBoxPrice.Text = product.Price.ToString();
-                        productElements = product.OutputElements;
-                        LoadData();
-                    }
-                    else
-                    {
-                        throw new Exception(APICustomer.GetError(response));
-                    }
+                    var product = Task.Run(() => APICustomer.GetRequestData<ModelOutputView>("api/Output/Get/" + id.Value)).Result;
+                    textBoxName.Text = product.OutputName;
+                    textBoxPrice.Text = product.Price.ToString();
+                    productElements = product.OutputElements;
+                    LoadData();
                 }
                 catch (Exception ex)
                 {
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                    }
                     MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -156,54 +152,54 @@ namespace WpfSnackBar
                 MessageBox.Show("Заполните компоненты", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            try
+            List<BoundProdElementModel> productComponentBM = new List<BoundProdElementModel>();
+            for (int i = 0; i < productElements.Count; ++i)
             {
-                List<BoundProdElementModel> productComponentBM = new List<BoundProdElementModel>();
-                for (int i = 0; i < productElements.Count; ++i)
+                productComponentBM.Add(new BoundProdElementModel
                 {
-                    productComponentBM.Add(new BoundProdElementModel
-                    {
-                        ID = productElements[i].ID,
-                        OutputID = productElements[i].OutputID,
-                        ElementID = productElements[i].ElementID,
-                        Count = productElements[i].Count
-                    });
-                }
-                Task<HttpResponseMessage> response;
-                if (id.HasValue)
-                {
-                    response = APICustomer.PostRequest("api/Output/UpdElement", new BoundOutputModel
-                    {
-                        ID = id.Value,
-                        OutputName = textBoxName.Text,
-                        Price = Convert.ToInt32(textBoxPrice.Text),
-                        OutputElements = productComponentBM
-                    });
-                }
-                else
-                {
-                    response = APICustomer.PostRequest("api/Output/AddElement", new BoundOutputModel
-                    {
-                        OutputName = textBoxName.Text,
-                        Price = Convert.ToInt32(textBoxPrice.Text),
-                        OutputElements = productComponentBM
-                    });
-                }
-                if (response.Result.IsSuccessStatusCode)
-                {
-                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
-                    DialogResult = true;
-                    Close();
-                }
-                else
-                {
-                    throw new Exception(APICustomer.GetError(response));
-                }
+                    ID = productElements[i].ID,
+                    OutputID = productElements[i].OutputID,
+                    ElementID = productElements[i].ElementID,
+                    Count = productElements[i].Count
+                });
             }
-            catch (Exception ex)
+
+            string name = textBoxName.Text;
+            int price = Convert.ToInt32(textBoxPrice.Text);
+            Task task;
+            if (id.HasValue)
             {
+                task = Task.Run(() => APICustomer.PostRequestData("api/Output/UpdElement", new BoundOutputModel
+                {
+                    ID = id.Value,
+                    OutputName = name,
+                    Price = price,
+                    OutputElements = productComponentBM
+                }));
+            }
+            else
+            {
+                task = Task.Run(() => APICustomer.PostRequestData("api/Output/AddElement", new BoundOutputModel
+                {
+                    OutputName = name,
+                    Price = price,
+                    OutputElements = productComponentBM
+                }));
+            }
+
+            task.ContinueWith((prevTask) => MessageBox.Show("Сохранение прошло успешно. Обновите список", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information),
+            TaskContinuationOptions.OnlyOnRanToCompletion);
+            task.ContinueWith((prevTask) =>
+            {
+                var ex = (Exception)prevTask.Exception;
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            }, TaskContinuationOptions.OnlyOnFaulted);
+
+            Close();
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
