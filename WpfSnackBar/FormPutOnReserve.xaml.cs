@@ -14,8 +14,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Unity;
-using Unity.Attributes;
 
 namespace WpfSnackBar
 {
@@ -24,43 +22,47 @@ namespace WpfSnackBar
     /// </summary>
     public partial class FormPutOnReserve : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        private readonly InterfaceReserveService serviceReserve;
-
-        private readonly InterfaceComponentService serviceComponent;
-
-        private readonly InterfaceMainService serviceMain;
-
-        public FormPutOnReserve(InterfaceReserveService serviceS, InterfaceComponentService serviceC, InterfaceMainService serviceM)
+        public FormPutOnReserve()
         {
             InitializeComponent();
             Loaded += FormPutOnReserve_Load;
-            this.serviceReserve = serviceS;
-            this.serviceComponent = serviceC;
-            this.serviceMain = serviceM;
         }
 
         private void FormPutOnReserve_Load(object sender, EventArgs e)
         {
             try
             {
-                List<ModelElementView> listElement = serviceComponent.getList();
-                if (listElement != null)
+                var responseC = APICustomer.GetRequest("api/Element/GetList");
+                if (responseC.Result.IsSuccessStatusCode)
                 {
-                    comboBoxComponent.DisplayMemberPath = "ElementName";
-                    comboBoxComponent.SelectedValuePath = "Id";
-                    comboBoxComponent.ItemsSource = listElement;
-                    comboBoxComponent.SelectedItem = null;
+                    List<ModelElementView> list = APICustomer.GetElement<List<ModelElementView>>(responseC);
+                    if (list != null)
+                    {
+                        comboBoxComponent.DisplayMemberPath = "ElementName";
+                        comboBoxComponent.SelectedValuePath = "Id";
+                        comboBoxComponent.ItemsSource = list;
+                        comboBoxComponent.SelectedItem = null;
+                    }
                 }
-                List<ModelReserveView> listReserve = serviceReserve.getList();
-                if (listReserve != null)
+                else
                 {
-                    comboBoxStock.DisplayMemberPath = "ReserveName";
-                    comboBoxStock.SelectedValuePath = "Id";
-                    comboBoxStock.ItemsSource = listReserve;
-                    comboBoxStock.SelectedItem = null;
+                    throw new Exception(APICustomer.GetError(responseC));
+                }
+                var responseS = APICustomer.GetRequest("api/Reserve/GetList");
+                if (responseS.Result.IsSuccessStatusCode)
+                {
+                    List<ModelReserveView> list = APICustomer.GetElement<List<ModelReserveView>>(responseS);
+                    if (list != null)
+                    {
+                        comboBoxStock.DisplayMemberPath = "ReserveName";
+                        comboBoxStock.SelectedValuePath = "Id";
+                        comboBoxStock.ItemsSource = list;
+                        comboBoxStock.SelectedItem = null;
+                    }
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(responseC));
                 }
             }
             catch (Exception ex)
@@ -88,16 +90,22 @@ namespace WpfSnackBar
             }
             try
             {
-                serviceMain.putComponentOnReserve(new BoundResElementModel
+                var response = APICustomer.PostRequest("api/Main/PutElementOnReserve", new BoundResElementModel
                 {
-                    ElementID = ((ModelElementView) comboBoxComponent.SelectedItem).ID,
-                    ReserveID = ((ModelReserveView) comboBoxStock.SelectedItem).ID,
+                    ElementID = ((ModelElementView)comboBoxComponent.SelectedItem).ID,
+                    ReserveID = ((ModelReserveView)comboBoxStock.SelectedItem).ID,
                     Count = Convert.ToInt32(textBoxCount.Text)
                 });
-                MessageBox.Show("Сохранение прошло успешно", "Информация", 
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-                DialogResult = true;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
+                    DialogResult = true;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

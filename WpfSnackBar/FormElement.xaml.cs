@@ -4,6 +4,7 @@ using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,8 +15,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Unity;
-using Unity.Attributes;
 
 namespace WpfSnackBar
 {
@@ -24,20 +23,14 @@ namespace WpfSnackBar
     /// </summary>
     public partial class FormElement : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
         public int ID { set { id = value; } }
-
-        private readonly InterfaceComponentService service;
 
         private int? id;
 
-        public FormElement(InterfaceComponentService service)
+        public FormElement()
         {
             InitializeComponent();
             Loaded += FormElement_Load;
-            this.service = service;
         }
 
         private void FormElement_Load(object sender, EventArgs e)
@@ -46,10 +39,15 @@ namespace WpfSnackBar
             {
                 try
                 {
-                    ModelElementView view = service.getElement(id.Value);
-                    if (view != null)
+                    var response = APICustomer.GetRequest("api/Element/Get/" + id.Value);
+                    if (response.Result.IsSuccessStatusCode)
                     {
-                        textBoxName.Text = view.ElementName;
+                        var component = APICustomer.GetElement<ModelElementView>(response);
+                        textBoxName.Text = component.ElementName;
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
                     }
                 }
                 catch (Exception ex)
@@ -68,9 +66,10 @@ namespace WpfSnackBar
             }
             try
             {
+                Task<HttpResponseMessage> response;
                 if (id.HasValue)
                 {
-                    service.updateElement(new BoundElementModel
+                    response = APICustomer.PostRequest("api/Element/UpdElement", new BoundElementModel
                     {
                         ID = id.Value,
                         ElementName = textBoxName.Text
@@ -78,14 +77,21 @@ namespace WpfSnackBar
                 }
                 else
                 {
-                    service.addElement(new BoundElementModel
+                    response = APICustomer.PostRequest("api/Element/AddElement", new BoundElementModel
                     {
                         ElementName = textBoxName.Text
                     });
                 }
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                DialogResult = true;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                    DialogResult = true;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

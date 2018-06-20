@@ -2,6 +2,7 @@
 using Microsoft.Win32;
 using SnackBarService.DataFromUser;
 using SnackBarService.Interfaces;
+using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,18 +27,12 @@ namespace WpfSnackBar
     /// </summary>
     public partial class FormCustomerBookings : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        private readonly InterfaceReportService service;
-
         private bool _isReportViewerLoaded;
 
-        public FormCustomerBookings(InterfaceReportService service)
+        public FormCustomerBookings()
         {
             InitializeComponent();
             reportViewer.Load += FormCustomerBookings_Load;
-            this.service = service;
         }
 
         private void FormCustomerBookings_Load(object sender, EventArgs e)
@@ -45,7 +40,7 @@ namespace WpfSnackBar
             if (!_isReportViewerLoaded)
             {
                 string exeFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-                reportViewer.LocalReport.ReportPath = exeFolder + @"\Reports\ReportCustomerBookings.rdlc";
+                reportViewer.LocalReport.ReportPath = exeFolder + @"\ReportCustomerBookings.rdlc";
 
                 reportViewer.RefreshReport();
                 _isReportViewerLoaded = true;
@@ -66,14 +61,21 @@ namespace WpfSnackBar
                                             " по " + dateTimePickerTo.SelectedDate.Value.Date.ToShortDateString());
                 reportViewer.LocalReport.SetParameters(parameter);
 
-                var dataSource = service.GetCustomerBookings(new BoundReportModel
+                var response = APICustomer.PostRequest("api/Report/GetCustomerBookings", new BoundReportModel
                 {
                     DateFrom = dateTimePickerFrom.SelectedDate.Value,
                     DateTo = dateTimePickerTo.SelectedDate.Value
                 });
-                
-                ReportDataSource source = new ReportDataSource("DataSetBookings", dataSource);
-                reportViewer.LocalReport.DataSources.Add(source);
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    var dataSource = APICustomer.GetElement<List<ModelCustomerBookingsView>>(response);
+                    ReportDataSource source = new ReportDataSource("DataSetBookings", dataSource);
+                    reportViewer.LocalReport.DataSources.Add(source);
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
 
                 reportViewer.RefreshReport();
             }
@@ -98,13 +100,20 @@ namespace WpfSnackBar
             {
                 try
                 {
-                    service.SaveCustomerBookings(new BoundReportModel
+                    var response = APICustomer.PostRequest("api/Report/SaveCustomerBookings", new BoundReportModel
                     {
                         FileName = sfd.FileName,
                         DateFrom = dateTimePickerFrom.SelectedDate.Value,
                         DateTo = dateTimePickerTo.SelectedDate.Value
                     });
-                    MessageBox.Show("Выполнено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    if (response.Result.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Выполнено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
+                    }
                 }
                 catch (Exception ex)
                 {

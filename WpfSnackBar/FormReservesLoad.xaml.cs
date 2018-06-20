@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using SnackBarService.DataFromUser;
 using SnackBarService.Interfaces;
+using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +15,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Unity;
-using Unity.Attributes;
 
 namespace WpfSnackBar
 {
@@ -24,31 +23,25 @@ namespace WpfSnackBar
     /// </summary>
     public partial class FormReservesLoad : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        private readonly InterfaceReportService service;
-
-        public FormReservesLoad(InterfaceReportService service)
+        public FormReservesLoad()
         {
             InitializeComponent();
-            this.service = service;
         }
 
         private void FormReservesLoad_Load(object sender, EventArgs e)
         {
             try
             {
-                var dict = service.GetReservesLoad();
-                if (dict != null)
+                var response = APICustomer.GetRequest("api/Report/GetReservesLoad");
+                if (response.Result.IsSuccessStatusCode)
                 {
                     dataGridView.Items.Clear();
-                    foreach (var elem in dict)
+                    foreach (var elem in APICustomer.GetElement<List<ModelReservesLoadView>>(response))
                     {
                         dataGridView.Items.Add(new object[] { elem.ReserveName, "", "" });
                         foreach (var listElem in elem.Elements)
                         {
-                            dataGridView.Items.Add(new object[] { "", listElem.Item1, listElem.Item2 });
+                            dataGridView.Items.Add(new object[] { "", listElem.ElementName, listElem.Count });
                         }
                         dataGridView.Items.Add(new object[] { "Итого", "", elem.TotalCount });
                         dataGridView.Items.Add(new object[] { });
@@ -71,11 +64,18 @@ namespace WpfSnackBar
             {
                 try
                 {
-                    service.SaveReservesLoad(new BoundReportModel
+                    var response = APICustomer.PostRequest("api/Report/SaveReservesLoad", new BoundReportModel
                     {
                         FileName = sfd.FileName
                     });
-                    MessageBox.Show("Выполнено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    if (response.Result.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Выполнено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
+                    }
                 }
                 catch (Exception ex)
                 {

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,8 +16,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Unity;
-using Unity.Attributes;
 
 namespace WpfSnackBar
 {
@@ -25,22 +24,16 @@ namespace WpfSnackBar
     /// </summary>
     public partial class FormOutput : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
         public int ID { set { id = value; } }
-
-        private readonly InterfaceOutputService service;
 
         private int? id;
 
         private List<ModelProdElementView> productElements;
 
-        public FormOutput(InterfaceOutputService service)
+        public FormOutput()
         {
             InitializeComponent();
             Loaded += FormOutput_Load;
-            this.service = service;
         }
 
         private void FormOutput_Load(object sender, EventArgs e)
@@ -49,13 +42,18 @@ namespace WpfSnackBar
             {
                 try
                 {
-                    ModelOutputView view = service.getElement(id.Value);
-                    if (view != null)
+                    var response = APICustomer.GetRequest("api/Output/Get/" + id.Value);
+                    if (response.Result.IsSuccessStatusCode)
                     {
-                        textBoxName.Text = view.OutputName;
-                        textBoxPrice.Text = view.Price.ToString();
-                        productElements = view.OutputElements;
+                        var product = APICustomer.GetElement<ModelOutputView>(response);
+                        textBoxName.Text = product.OutputName;
+                        textBoxPrice.Text = product.Price.ToString();
+                        productElements = product.OutputElements;
                         LoadData();
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
                     }
                 }
                 catch (Exception ex)
@@ -89,7 +87,7 @@ namespace WpfSnackBar
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormOutputElement>();
+            var form = new FormOutputElement();
             if (form.ShowDialog() == true)
             {
                 if (form.Model != null)
@@ -106,7 +104,7 @@ namespace WpfSnackBar
         {
             if (dataGridViewProduct.SelectedItem != null)
             {
-                var form = Container.Resolve<FormOutputElement>();
+                var form = new FormOutputElement();
                 form.Model = productElements[dataGridViewProduct.SelectedIndex];
                 if (form.ShowDialog() == true)
                 {
@@ -120,7 +118,7 @@ namespace WpfSnackBar
         {
             if (dataGridViewProduct.SelectedItem != null)
             {
-                if (MessageBox.Show("Удалить запись?", "Внимание", 
+                if (MessageBox.Show("Удалить запись?", "Внимание",
                     MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     try
@@ -171,9 +169,10 @@ namespace WpfSnackBar
                         Count = productElements[i].Count
                     });
                 }
+                Task<HttpResponseMessage> response;
                 if (id.HasValue)
                 {
-                    service.updateElement(new BoundOutputModel
+                    response = APICustomer.PostRequest("api/Output/UpdElement", new BoundOutputModel
                     {
                         ID = id.Value,
                         OutputName = textBoxName.Text,
@@ -183,16 +182,23 @@ namespace WpfSnackBar
                 }
                 else
                 {
-                    service.addElement(new BoundOutputModel
+                    response = APICustomer.PostRequest("api/Output/AddElement", new BoundOutputModel
                     {
                         OutputName = textBoxName.Text,
                         Price = Convert.ToInt32(textBoxPrice.Text),
                         OutputElements = productComponentBM
                     });
                 }
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                DialogResult = true;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
+                    DialogResult = true;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

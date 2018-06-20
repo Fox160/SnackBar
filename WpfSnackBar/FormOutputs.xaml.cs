@@ -1,4 +1,5 @@
-﻿using SnackBarService.Interfaces;
+﻿using SnackBarService.DataFromUser;
+using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -14,8 +15,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Unity;
-using Unity.Attributes;
 
 namespace WpfSnackBar
 {
@@ -24,16 +23,10 @@ namespace WpfSnackBar
     // </summary>
     public partial class FormOutputs : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        private readonly InterfaceOutputService service;
-
-        public FormOutputs(InterfaceOutputService service)
+        public FormOutputs()
         {
             InitializeComponent();
             Loaded += FormOutputs_Load;
-            this.service = service;
         }
 
         private void FormOutputs_Load(object sender, EventArgs e)
@@ -45,13 +38,21 @@ namespace WpfSnackBar
         {
             try
             {
-                List<ModelOutputView> list = service.getList();
-                if (list != null)
+                var response = APICustomer.GetRequest("api/Output/GetList");
+                if (response.Result.IsSuccessStatusCode)
                 {
-                    dataGridViewProducts.ItemsSource = list;
-                    dataGridViewProducts.Columns[0].Visibility = Visibility.Hidden;
-                    dataGridViewProducts.Columns[1].Width = DataGridLength.Auto;
-                    dataGridViewProducts.Columns[3].Visibility = Visibility.Hidden;
+                    List<ModelOutputView> list = APICustomer.GetElement<List<ModelOutputView>>(response);
+                    if (list != null)
+                    {
+                        dataGridViewProducts.ItemsSource = list;
+                        dataGridViewProducts.Columns[0].Visibility = Visibility.Hidden;
+                        dataGridViewProducts.Columns[1].Width = DataGridLength.Auto;
+                        dataGridViewProducts.Columns[3].Visibility = Visibility.Hidden;
+                    }
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
                 }
             }
             catch (Exception ex)
@@ -62,7 +63,7 @@ namespace WpfSnackBar
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormOutput>();
+            var form = new FormOutput();
             if (form.ShowDialog() == true)
                 LoadData();
         }
@@ -71,7 +72,7 @@ namespace WpfSnackBar
         {
             if (dataGridViewProducts.SelectedItem != null)
             {
-                var form = Container.Resolve<FormOutput>();
+                var form = new FormOutput();
                 form.ID = ((ModelOutputView)dataGridViewProducts.SelectedItem).ID;
                 if (form.ShowDialog() == true)
                     LoadData();
@@ -89,7 +90,11 @@ namespace WpfSnackBar
                     int id = ((ModelOutputView)dataGridViewProducts.SelectedItem).ID;
                     try
                     {
-                        service.deleteElement(id);
+                        var response = APICustomer.PostRequest("api/Output/DelElement", new BoundCustomerModel { ID = id });
+                        if (!response.Result.IsSuccessStatusCode)
+                        {
+                            throw new Exception(APICustomer.GetError(response));
+                        }
                     }
                     catch (Exception ex)
                     {

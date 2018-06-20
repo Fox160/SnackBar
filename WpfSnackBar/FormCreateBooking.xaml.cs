@@ -14,8 +14,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Unity;
-using Unity.Attributes;
 
 namespace WpfSnackBar
 {
@@ -24,47 +22,50 @@ namespace WpfSnackBar
     /// </summary>
     public partial class FormCreateBooking : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        private readonly InterfaceCustomerService serviceClient;
-
-        private readonly InterfaceOutputService serviceProduct;
-
-        private readonly InterfaceMainService serviceMain;
-
-
-        public FormCreateBooking(InterfaceCustomerService serviceC, InterfaceOutputService serviceP, InterfaceMainService serviceM)
+        public FormCreateBooking()
         {
             InitializeComponent();
             Loaded += FormCreateBooking_Load;
             comboBoxProduct.SelectionChanged += comboBoxProduct_SelectedIndexChanged;
 
             comboBoxProduct.SelectionChanged += new SelectionChangedEventHandler(comboBoxProduct_SelectedIndexChanged);
-            this.serviceClient = serviceC;
-            this.serviceProduct = serviceP;
-            this.serviceMain = serviceM;
         }
 
         private void FormCreateBooking_Load(object sender, EventArgs e)
         {
             try
             {
-                List<ModelCustomerView> listClient = serviceClient.getList();
-                if (listClient != null)
+                var responseC = APICustomer.GetRequest("api/Customer/GetList");
+                if (responseC.Result.IsSuccessStatusCode)
                 {
-                    comboBoxClient.DisplayMemberPath = "CustomerFullName";
-                    comboBoxClient.SelectedValuePath = "Id";
-                    comboBoxClient.ItemsSource = listClient;
-                    comboBoxProduct.SelectedItem = null;
+                    List<ModelCustomerView> list = APICustomer.GetElement<List<ModelCustomerView>>(responseC);
+                    if (list != null)
+                    {
+                        comboBoxClient.DisplayMemberPath = "CustomerFullName";
+                        comboBoxClient.SelectedValuePath = "Id";
+                        comboBoxClient.ItemsSource = list;
+                        comboBoxClient.SelectedItem = null;
+                    }
                 }
-                List<ModelOutputView> listProduct = serviceProduct.getList();
-                if (listProduct != null)
+                else
                 {
-                    comboBoxProduct.DisplayMemberPath = "OutputName";
-                    comboBoxProduct.SelectedValuePath = "Id";
-                    comboBoxProduct.ItemsSource = listProduct;
-                    comboBoxProduct.SelectedItem = null;
+                    throw new Exception(APICustomer.GetError(responseC));
+                }
+                var responseP = APICustomer.GetRequest("api/Output/GetList");
+                if (responseP.Result.IsSuccessStatusCode)
+                {
+                    List<ModelOutputView> list = APICustomer.GetElement<List<ModelOutputView>>(responseP);
+                    if (list != null)
+                    {
+                        comboBoxProduct.DisplayMemberPath = "OutputName";
+                        comboBoxProduct.SelectedValuePath = "Id";
+                        comboBoxProduct.ItemsSource = list;
+                        comboBoxProduct.SelectedItem = null;
+                    }
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(responseP));
                 }
             }
             catch (Exception ex)
@@ -75,14 +76,22 @@ namespace WpfSnackBar
 
         private void CalcSum()
         {
-            if (comboBoxProduct.SelectedItem != null && !string.IsNullOrEmpty(textBoxCount.Text))
+            if (!string.IsNullOrEmpty(comboBoxProduct.Text) && !string.IsNullOrEmpty(textBoxCount.Text))
             {
                 try
                 {
                     int id = ((ModelOutputView)comboBoxProduct.SelectedItem).ID;
-                    ModelOutputView product = serviceProduct.getElement(id);
-                    int count = Convert.ToInt32(textBoxCount.Text);
-                    textBoxSum.Text = Convert.ToInt32(count * product.Price).ToString();
+                    var responseP = APICustomer.GetRequest("api/Output/Get/" + id);
+                    if (responseP.Result.IsSuccessStatusCode)
+                    {
+                        ModelOutputView product = APICustomer.GetElement<ModelOutputView>(responseP);
+                        int count = Convert.ToInt32(textBoxCount.Text);
+                        textBoxSum.Text = Convert.ToInt32(count * product.Price).ToString();
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(responseP));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -120,16 +129,23 @@ namespace WpfSnackBar
             }
             try
             {
-                serviceMain.createOrder(new BoundBookingModel
+                var response = APICustomer.PostRequest("api/Main/CreateBooking", new ModelBookingView
                 {
                     CustomerID = Convert.ToInt32(((ModelCustomerView)comboBoxClient.SelectedItem).ID),
                     OutputID = Convert.ToInt32(((ModelOutputView)comboBoxProduct.SelectedItem).ID),
                     Count = Convert.ToInt32(textBoxCount.Text),
                     Summa = Convert.ToInt32(textBoxSum.Text)
                 });
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                DialogResult = true;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
+                    DialogResult = true;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {
