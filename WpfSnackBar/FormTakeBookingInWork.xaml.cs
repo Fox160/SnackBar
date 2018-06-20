@@ -14,8 +14,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Unity;
-using Unity.Attributes;
 
 namespace WpfSnackBar
 {
@@ -24,23 +22,14 @@ namespace WpfSnackBar
     /// </summary>
     public partial class FormTakeBookingInWork : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
         public int ID { set { id = value; } }
-
-        private readonly InterfaceExecutorService serviceExecutor;
-
-        private readonly InterfaceMainService serviceMain;
 
         private int? id;
 
-        public FormTakeBookingInWork(InterfaceExecutorService serviceI, InterfaceMainService serviceM)
+        public FormTakeBookingInWork()
         {
             InitializeComponent();
             Loaded += FormTakeBookingInWork_Load;
-            this.serviceExecutor = serviceI;
-            this.serviceMain = serviceM;
         }
 
         private void FormTakeBookingInWork_Load(object sender, EventArgs e)
@@ -52,14 +41,21 @@ namespace WpfSnackBar
                     MessageBox.Show("Не указан заказ", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     Close();
                 }
-                List<ModelExecutorView> listExecutor = serviceExecutor.getList();
-                if (listExecutor != null)
+                var response = APICustomer.GetRequest("api/Executor/GetList");
+                if (response.Result.IsSuccessStatusCode)
                 {
-                    comboBoxExecutor.DisplayMemberPath = "ExecutorFullName";
-                    comboBoxExecutor.SelectedValuePath = "Id";
-                    comboBoxExecutor.ItemsSource = listExecutor;
-                    comboBoxExecutor.SelectedItem = null;
-
+                    List<ModelExecutorView> list = APICustomer.GetElement<List<ModelExecutorView>>(response);
+                    if (list != null)
+                    {
+                        comboBoxExecutor.DisplayMemberPath = "ExecutorFullName";
+                        comboBoxExecutor.SelectedValuePath = "Id";
+                        comboBoxExecutor.ItemsSource = list;
+                        comboBoxExecutor.SelectedItem = null;
+                    }
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
                 }
             }
             catch (Exception ex)
@@ -77,14 +73,21 @@ namespace WpfSnackBar
             }
             try
             {
-                serviceMain.takeOrderInWork(new BoundBookingModel
+                var response = APICustomer.PostRequest("api/Main/TakeBookingInWork", new BoundBookingModel
                 {
                     ID = id.Value,
-                    ExecutorID = ((ModelExecutorView)comboBoxExecutor.SelectedItem).ID,
+                    ExecutorID = ((ModelExecutorView)comboBoxExecutor.SelectedItem).ID
                 });
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                DialogResult = true;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
+                    DialogResult = true;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {

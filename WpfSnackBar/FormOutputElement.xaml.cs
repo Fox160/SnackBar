@@ -13,8 +13,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Unity;
-using Unity.Attributes;
 
 namespace WpfSnackBar
 {
@@ -23,33 +21,31 @@ namespace WpfSnackBar
     /// </summary>
     public partial class FormOutputElement : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
         public ModelProdElementView Model { set { model = value; } get { return model; } }
-
-        private readonly InterfaceComponentService service;
 
         private ModelProdElementView model;
 
-        public FormOutputElement(InterfaceComponentService service)
+        public FormOutputElement()
         {
             InitializeComponent();
             Loaded += FormOutputElement_Load;
-            this.service = service;
         }
 
         private void FormOutputElement_Load(object sender, EventArgs e)
         {
-            List<ModelElementView> list = service.getList();
             try
             {
-                if (list != null)
+                var response = APICustomer.GetRequest("api/Element/GetList");
+                if (response.Result.IsSuccessStatusCode)
                 {
                     comboBoxComponent.DisplayMemberPath = "ElementName";
                     comboBoxComponent.SelectedValuePath = "Id";
-                    comboBoxComponent.ItemsSource = list;
+                    comboBoxComponent.ItemsSource = APICustomer.GetElement<List<ModelElementView>>(response);
                     comboBoxComponent.SelectedItem = null;
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
                 }
             }
             catch (Exception ex)
@@ -60,13 +56,7 @@ namespace WpfSnackBar
             if (model != null)
             {
                 comboBoxComponent.IsEnabled = false;
-                foreach (ModelElementView item in list)
-                {
-                    if (item.ElementName == model.ElementName)
-                    {
-                        comboBoxComponent.SelectedItem = item;
-                    }
-                }
+                comboBoxComponent.SelectedItem = model;
                 textBoxCount.Text = model.Count.ToString();
             }
         }
@@ -89,7 +79,7 @@ namespace WpfSnackBar
                 {
                     model = new ModelProdElementView
                     {
-                        ElementID = Convert.ToInt32(comboBoxComponent.SelectedValue),
+                        ElementID = ((ModelElementView) comboBoxComponent.SelectedItem).ID,
                         ElementName = comboBoxComponent.Text,
                         Count = Convert.ToInt32(textBoxCount.Text)
                     };

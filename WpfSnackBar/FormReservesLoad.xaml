@@ -1,0 +1,20 @@
+﻿<Window x:Class="WpfSnackBar.FormReservesLoad"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfSnackBar"
+        mc:Ignorable="d"
+        Title="Загруженность складов" Height="522" Width="544" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+    <Grid>
+        <Button x:Name="buttonSaveToExcel" Content="Сохранить в Excel" HorizontalAlignment="Left" Margin="33,10,0,0" VerticalAlignment="Top" Width="111" Height="25" Click="buttonSaveToExcel_Click"/>
+        <DataGrid x:Name="dataGridView" HorizontalAlignment="Left" Height="442" Margin="5,49,0,0" VerticalAlignment="Top" Width="528" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" Loaded="FormReservesLoad_Load">
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="ColumnReserve" Header="Склад" Width="*" Binding="{Binding [0]}"/>
+                <DataGridTextColumn x:Name="ColumnElement" Header="Компонент" Width="*" Binding="{Binding [1]}"/>
+                <DataGridTextColumn x:Name="ColumnCount" Header="Количество" Binding="{Binding [2]}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </Grid>
+</Window>

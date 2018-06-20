@@ -1,4 +1,5 @@
-﻿using SnackBarService.Interfaces;
+﻿using SnackBarService.DataFromUser;
+using SnackBarService.Interfaces;
 using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -14,8 +15,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Unity;
-using Unity.Attributes;
 
 namespace WpfSnackBar
 {
@@ -24,16 +23,10 @@ namespace WpfSnackBar
     /// </summary>
     public partial class FormExecutors : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
-        private readonly InterfaceExecutorService service;
-
-        public FormExecutors(InterfaceExecutorService service)
+        public FormExecutors()
         {
             InitializeComponent();
             Loaded += FormExecutors_Load;
-            this.service = service;
         }
 
         private void FormExecutors_Load(object sender, EventArgs e)
@@ -45,12 +38,20 @@ namespace WpfSnackBar
         {
             try
             {
-                List<ModelExecutorView> list = service.getList();
-                if (list != null)
+                var response = APICustomer.GetRequest("api/Executor/GetList");
+                if (response.Result.IsSuccessStatusCode)
                 {
-                    dataGridViewExecutors.ItemsSource = list;
-                    dataGridViewExecutors.Columns[0].Visibility = Visibility.Hidden;
-                    dataGridViewExecutors.Columns[1].Width = DataGridLength.Auto;
+                    List<ModelExecutorView> list = APICustomer.GetElement<List<ModelExecutorView>>(response);
+                    if (list != null)
+                    {
+                        dataGridViewExecutors.ItemsSource = list;
+                        dataGridViewExecutors.Columns[0].Visibility = Visibility.Hidden;
+                        dataGridViewExecutors.Columns[1].Width = DataGridLength.Auto;
+                    }
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
                 }
             }
             catch (Exception ex)
@@ -61,7 +62,7 @@ namespace WpfSnackBar
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            var form = Container.Resolve<FormExecutor>();
+            var form = new FormExecutor();
             if (form.ShowDialog() == true)
                 LoadData();
         }
@@ -70,7 +71,7 @@ namespace WpfSnackBar
         {
             if (dataGridViewExecutors.SelectedItem != null)
             {
-                var form = Container.Resolve<FormExecutor>();
+                var form = new FormExecutor();
                 form.ID = ((ModelExecutorView)dataGridViewExecutors.SelectedItem).ID;
                 if (form.ShowDialog() == true)
                     LoadData();
@@ -87,7 +88,11 @@ namespace WpfSnackBar
                     int id = ((ModelExecutorView)dataGridViewExecutors.SelectedItem).ID;
                     try
                     {
-                        service.deleteElement(id);
+                        var response = APICustomer.PostRequest("api/Executor/DelElement", new BoundCustomerModel { ID = id });
+                        if (!response.Result.IsSuccessStatusCode)
+                        {
+                            throw new Exception(APICustomer.GetError(response));
+                        }
                     }
                     catch (Exception ex)
                     {

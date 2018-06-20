@@ -4,6 +4,7 @@ using SnackBarService.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,8 +15,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Unity;
-using Unity.Attributes;
 
 namespace WpfSnackBar
 {
@@ -24,20 +23,14 @@ namespace WpfSnackBar
     /// </summary>
     public partial class FormReserve : Window
     {
-        [Dependency]
-        public new IUnityContainer Container { get; set; }
-
         public int ID { set { id = value; } }
-
-        private readonly InterfaceReserveService service;
 
         private int? id;
 
-        public FormReserve(InterfaceReserveService service)
+        public FormReserve()
         {
             InitializeComponent();
             Loaded += FormReserve_Load;
-            this.service = service;
         }
 
         private void FormReserve_Load(object sender, EventArgs e)
@@ -46,15 +39,20 @@ namespace WpfSnackBar
             {
                 try
                 {
-                    ModelReserveView view = service.getElement(id.Value);
-                    if (view != null)
+                    var response = APICustomer.GetRequest("api/Reserve/Get/" + id.Value);
+                    if (response.Result.IsSuccessStatusCode)
                     {
-                        textBoxName.Text = view.ReserveName;
-                        dataGridViewReserve.ItemsSource = view.ReserveElements;
+                        var stock = APICustomer.GetElement<ModelReserveView>(response);
+                        textBoxName.Text = stock.ReserveName;
+                        dataGridViewReserve.ItemsSource = stock.ReserveElements;
                         dataGridViewReserve.Columns[0].Visibility = Visibility.Hidden;
                         dataGridViewReserve.Columns[1].Visibility = Visibility.Hidden;
                         dataGridViewReserve.Columns[2].Visibility = Visibility.Hidden;
                         dataGridViewReserve.Columns[3].Width = DataGridLength.Auto;
+                    }
+                    else
+                    {
+                        throw new Exception(APICustomer.GetError(response));
                     }
                 }
                 catch (Exception ex)
@@ -73,9 +71,10 @@ namespace WpfSnackBar
             }
             try
             {
+                Task<HttpResponseMessage> response;
                 if (id.HasValue)
                 {
-                    service.updateElement(new BoundReserveModel
+                    response = APICustomer.PostRequest("api/Reserve/UpdElement", new BoundReserveModel
                     {
                         ID = id.Value,
                         ReserveName = textBoxName.Text
@@ -83,14 +82,21 @@ namespace WpfSnackBar
                 }
                 else
                 {
-                    service.addElement(new BoundReserveModel
+                    response = APICustomer.PostRequest("api/Reserve/AddElement", new BoundReserveModel
                     {
                         ReserveName = textBoxName.Text
                     });
                 }
-                MessageBox.Show("Сохранение прошло успешно", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                DialogResult = true;
-                Close();
+                if (response.Result.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Сохранение прошло успешно", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
+                    DialogResult = true;
+                    Close();
+                }
+                else
+                {
+                    throw new Exception(APICustomer.GetError(response));
+                }
             }
             catch (Exception ex)
             {
