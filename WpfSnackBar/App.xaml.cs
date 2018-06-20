@@ -8,6 +8,8 @@ using SnackBarService;
 using SnackBarService.ImplementationsDB;
 using SnackBarService.Interfaces;
 using System.Windows;
+using Unity;
+using Unity.Lifetime;
 using System.Data.Entity;
 
 namespace WpfSnackBar
